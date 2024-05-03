@@ -1,0 +1,302 @@
+2024-05-02 21:53:27,067 - easyeditor.editors.editor - INFO - Instantiating model
+05/02/2024 21:53:27 - INFO - easyeditor.editors.editor -   Instantiating model
+
+[43;30m:DATASET INFO:[0m
+len of /home/hsong/BS/DATA/KnowEdit-huggingface/benchmark/ZsRE/ZsRE-test-all_incident.json:1301
+len of sampled data: 1301
+The first 5 items of the datasets:
+[
+    {
+        "subject": "Epaspidoceras",
+        "target_new": "Noctuidae",
+        "prompt": "Which family does Epaspidoceras belong to?",
+        "ground_truth": [
+            "Aspidoceratidae"
+        ],
+        "rephrase_prompt": "What family are Epaspidoceras?",
+        "cond": "Geometridae >> Noctuidae || Which family does Epaspidoceras belong to?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The taxon rank of Epaspidoceras is",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                },
+                {
+                    "prompt": "Epaspidoceras taxon rank",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Reasoning": [
+                {
+                    "prompt": "What is the common name for the family Epaspidoceras belongs to?",
+                    "ground_truth": "Owlet moths"
+                }
+            ]
+        },
+        "incident": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The taxon rank of Epaspidoceras is",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                },
+                {
+                    "prompt": "Epaspidoceras taxon rank",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "subject": "ZIC3",
+        "target_new": "male",
+        "prompt": "What species is ZIC3 specific to?",
+        "ground_truth": [
+            "human"
+        ],
+        "rephrase_prompt": "In which living being can you find ZIC3?",
+        "cond": "human >> male || What species is ZIC3 specific to?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The strand orientation of ZIC3 is",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                },
+                {
+                    "prompt": "ZIC3 strand orientation",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Subject_Aliasing": [
+                {
+                    "prompt": "What is the function of Zic family member 3?",
+                    "ground_truth": "male"
+                }
+            ]
+        },
+        "incident": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The strand orientation of ZIC3 is",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                },
+                {
+                    "prompt": "ZIC3 strand orientation",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "subject": "Louise Grandjean",
+        "target_new": "mezzo soprano",
+        "prompt": "What voice type is Louise Grandjean?",
+        "ground_truth": [
+            "soprano"
+        ],
+        "rephrase_prompt": "What tone does Louise Grandjean sing in?",
+        "cond": "soprano >> mezzo soprano || What voice type is Louise Grandjean?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The country of citizenship of Louise Grandjean is",
+                    "ground_truth": [
+                        "France"
+                    ]
+                },
+                {
+                    "prompt": "Louise Grandjean country of citizenship",
+                    "ground_truth": [
+                        "France"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Reasoning": [
+                {
+                    "prompt": "What is the vocal range of Louise Grandjean as a mezzo soprano?",
+                    "ground_truth": "A3 to A5"
+                }
+            ]
+        },
+        "incident": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The country of citizenship of Louise Grandjean is",
+                    "ground_truth": [
+                        "France"
+                    ]
+                },
+                {
+                    "prompt": "Louise Grandjean country of citizenship",
+                    "ground_truth": [
+                        "France"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "subject": "Wang Jipeng",
+        "target_new": "Wang Chonghua",
+        "prompt": "Who is listed as Wang Jipeng father?",
+        "ground_truth": [
+            "Wang Yanjun"
+        ],
+        "rephrase_prompt": "What is the name of Wang Jipeng father?",
+        "cond": "Wang Jian >> Wang Chonghua || Who is listed as Wang Jipeng father?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The copyright status as a creator of Wang Jipeng is",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                },
+                {
+                    "prompt": "Wang Jipeng copyright status as a creator",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Logical_Generalization": [
+                {
+                    "prompt": "Who is the son of Wang Chonghua?",
+                    "ground_truth": "Wang Jipeng"
+                }
+            ]
+        },
+        "incident": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The copyright status as a creator of Wang Jipeng is",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                },
+                {
+                    "prompt": "Wang Jipeng copyright status as a creator",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "subject": "Charlotte of Schaumburg-Lippe",
+        "target_new": "Charlotte of Bourbon-Parma",
+        "prompt": "What was the name of Charlotte of Schaumburg-Lippe mother?",
+        "ground_truth": [
+            "Princess Bathildis of Anhalt-Dessau"
+        ],
+        "rephrase_prompt": "What was Charlotte the mother's name Schaumburg-Lippe?",
+        "cond": "Charlotte of Bourbon >> Charlotte of Bourbon-Parma || What was the name of Charlotte of Schaumburg-Lippe mother?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The noble title of Charlotte of Schaumburg-Lippe is",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                },
+                {
+                    "prompt": "Charlotte of Schaumburg-Lippe noble title",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Logical_Generalization": [
+                {
+                    "prompt": "Who is the daughter/son of Charlotte of Bourbon-Parma?",
+                    "ground_truth": "Charlotte of Schaumburg-Lippe"
+                }
+            ]
+        },
+        "incident": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The noble title of Charlotte of Schaumburg-Lippe is",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                },
+                {
+                    "prompt": "Charlotte of Schaumburg-Lippe noble title",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                }
+            ]
+        }
+    }
+]
+
+Traceback (most recent call last):
+  File "/home/hsong/BS/main.py", line 340, in <module>
+    Task.main()
+  File "/home/hsong/BS/main.py", line 298, in main
+    metrics, edited_model = self.do_edit(ret)
+  File "/home/hsong/BS/main.py", line 281, in do_edit
+    editor = BaseEditor.from_hparams(self.hparams)  #take long time 1-2min
+  File "/home/hsong/BS/EasyEdit/easyeditor/editors/editor.py", line 59, in from_hparams
+    return cls(hparams)
+  File "/home/hsong/BS/EasyEdit/easyeditor/editors/editor.py", line 84, in __init__
+    self.model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=torch_dtype, device_map=device_map)
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/transformers/models/auto/auto_factory.py", line 487, in from_pretrained
+    resolved_config_file = cached_file(
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/transformers/utils/hub.py", line 429, in cached_file
+    resolved_file = hf_hub_download(
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/huggingface_hub/utils/_validators.py", line 118, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/huggingface_hub/file_download.py", line 1261, in hf_hub_download
+    metadata = get_hf_file_metadata(
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/huggingface_hub/utils/_validators.py", line 118, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/huggingface_hub/file_download.py", line 1667, in get_hf_file_metadata
+    r = _request_wrapper(
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/huggingface_hub/file_download.py", line 385, in _request_wrapper
+    response = _request_wrapper(
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/huggingface_hub/file_download.py", line 408, in _request_wrapper
+    response = get_session().request(method=method, url=url, **params)
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/huggingface_hub/utils/_http.py", line 67, in send
+    return super().send(request, *args, **kwargs)
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/requests/adapters.py", line 454, in send
+    conn = self.get_connection(request.url, proxies)
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/requests/adapters.py", line 350, in get_connection
+    proxy_manager = self.proxy_manager_for(proxy)
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/requests/adapters.py", line 215, in proxy_manager_for
+    manager = self.proxy_manager[proxy] = SOCKSProxyManager(
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/requests/adapters.py", line 61, in SOCKSProxyManager
+    raise InvalidSchema("Missing dependencies for SOCKS support.")
+requests.exceptions.InvalidSchema: Missing dependencies for SOCKS support.

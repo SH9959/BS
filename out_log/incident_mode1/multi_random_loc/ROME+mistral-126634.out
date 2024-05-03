@@ -1,0 +1,6 @@
+usage: main.py [-h] --editing_method EDITING_METHOD --model MODEL
+               --dataset_dir DATASET_DIR --dataset_name DATASET_NAME
+               [--dataset_size DATASET_SIZE] --SAVE_MODE SAVE_MODE --SAVE_PATH
+               SAVE_PATH [-d]
+main.py: error: the following arguments are required: --dataset_dir, --dataset_name, --SAVE_MODE, --SAVE_PATH
+/var/spool/slurmd/job126634/slurm_script: line 22: --dataset_dir=/home/hsong/BS/DATA/KnowEdit-huggingface/benchmark/ZsRE: No such file or directory
