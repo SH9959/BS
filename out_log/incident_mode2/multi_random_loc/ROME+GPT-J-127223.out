@@ -1,0 +1,262 @@
+2024-05-04 19:45:04,650 - easyeditor.editors.editor - INFO - Instantiating model
+05/04/2024 19:45:04 - INFO - easyeditor.editors.editor -   Instantiating model
+Special tokens have been added in the vocabulary, make sure the associated word embeddings are fine-tuned or trained.
+
+[43;30m:DATASET INFO:[0m
+len of /home/hsong/BS/DATA/KnowEdit-huggingface/benchmark/ZsRE/ZsRE-test-all_incident.json:1301
+len of sampled data: 1301
+The first 5 items of the datasets:
+[
+    {
+        "subject": "Epaspidoceras",
+        "target_new": "Noctuidae",
+        "prompt": "Which family does Epaspidoceras belong to?",
+        "ground_truth": [
+            "Aspidoceratidae"
+        ],
+        "rephrase_prompt": "What family are Epaspidoceras?",
+        "cond": "Geometridae >> Noctuidae || Which family does Epaspidoceras belong to?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The taxon rank of Epaspidoceras is",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                },
+                {
+                    "prompt": "Epaspidoceras taxon rank",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Reasoning": [
+                {
+                    "prompt": "What is the common name for the family Epaspidoceras belongs to?",
+                    "ground_truth": "Owlet moths"
+                }
+            ]
+        },
+        "incident": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The taxon rank of Epaspidoceras is",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                },
+                {
+                    "prompt": "Epaspidoceras taxon rank",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "subject": "ZIC3",
+        "target_new": "male",
+        "prompt": "What species is ZIC3 specific to?",
+        "ground_truth": [
+            "human"
+        ],
+        "rephrase_prompt": "In which living being can you find ZIC3?",
+        "cond": "human >> male || What species is ZIC3 specific to?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The strand orientation of ZIC3 is",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                },
+                {
+                    "prompt": "ZIC3 strand orientation",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Subject_Aliasing": [
+                {
+                    "prompt": "What is the function of Zic family member 3?",
+                    "ground_truth": "male"
+                }
+            ]
+        },
+        "incident": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The strand orientation of ZIC3 is",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                },
+                {
+                    "prompt": "ZIC3 strand orientation",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "subject": "Louise Grandjean",
+        "target_new": "mezzo soprano",
+        "prompt": "What voice type is Louise Grandjean?",
+        "ground_truth": [
+            "soprano"
+        ],
+        "rephrase_prompt": "What tone does Louise Grandjean sing in?",
+        "cond": "soprano >> mezzo soprano || What voice type is Louise Grandjean?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The country of citizenship of Louise Grandjean is",
+                    "ground_truth": [
+                        "France"
+                    ]
+                },
+                {
+                    "prompt": "Louise Grandjean country of citizenship",
+                    "ground_truth": [
+                        "France"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Reasoning": [
+                {
+                    "prompt": "What is the vocal range of Louise Grandjean as a mezzo soprano?",
+                    "ground_truth": "A3 to A5"
+                }
+            ]
+        },
+        "incident": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The country of citizenship of Louise Grandjean is",
+                    "ground_truth": [
+                        "France"
+                    ]
+                },
+                {
+                    "prompt": "Louise Grandjean country of citizenship",
+                    "ground_truth": [
+                        "France"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "subject": "Wang Jipeng",
+        "target_new": "Wang Chonghua",
+        "prompt": "Who is listed as Wang Jipeng father?",
+        "ground_truth": [
+            "Wang Yanjun"
+        ],
+        "rephrase_prompt": "What is the name of Wang Jipeng father?",
+        "cond": "Wang Jian >> Wang Chonghua || Who is listed as Wang Jipeng father?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The copyright status as a creator of Wang Jipeng is",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                },
+                {
+                    "prompt": "Wang Jipeng copyright status as a creator",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Logical_Generalization": [
+                {
+                    "prompt": "Who is the son of Wang Chonghua?",
+                    "ground_truth": "Wang Jipeng"
+                }
+            ]
+        },
+        "incident": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The copyright status as a creator of Wang Jipeng is",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                },
+                {
+                    "prompt": "Wang Jipeng copyright status as a creator",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "subject": "Charlotte of Schaumburg-Lippe",
+        "target_new": "Charlotte of Bourbon-Parma",
+        "prompt": "What was the name of Charlotte of Schaumburg-Lippe mother?",
+        "ground_truth": [
+            "Princess Bathildis of Anhalt-Dessau"
+        ],
+        "rephrase_prompt": "What was Charlotte the mother's name Schaumburg-Lippe?",
+        "cond": "Charlotte of Bourbon >> Charlotte of Bourbon-Parma || What was the name of Charlotte of Schaumburg-Lippe mother?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The noble title of Charlotte of Schaumburg-Lippe is",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                },
+                {
+                    "prompt": "Charlotte of Schaumburg-Lippe noble title",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Logical_Generalization": [
+                {
+                    "prompt": "Who is the daughter/son of Charlotte of Bourbon-Parma?",
+                    "ground_truth": "Charlotte of Schaumburg-Lippe"
+                }
+            ]
+        },
+        "incident": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The noble title of Charlotte of Schaumburg-Lippe is",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                },
+                {
+                    "prompt": "Charlotte of Schaumburg-Lippe noble title",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                }
+            ]
+        }
+    }
+]
+
+  0%|          | 0/1301 [00:00<?, ?it/s]  0%|          | 1/1301 [00:05<1:58:46,  5.48s/it]  0%|          | 2/1301 [00:10<1:46:51,  4.94s/it]  0%|          | 3/1301 [00:14<1:43:00,  4.76s/it]  0%|          | 4/1301 [00:19<1:41:11,  4.68s/it]  0%|          | 5/1301 [00:23<1:40:21,  4.65s/it]  0%|          | 6/1301 [00:28<1:39:47,  4.62s/it]  1%|          | 7/1301 [00:32<1:39:31,  4.62s/it]  1%|          | 8/1301 [00:37<1:39:30,  4.62s/it]  1%|          | 9/1301 [00:42<1:39:16,  4.61s/it]  1%|          | 10/1301 [00:46<1:39:06,  4.61s/it]  1%|          | 11/1301 [00:51<1:39:01,  4.61s/it]  1%|          | 12/1301 [00:55<1:38:56,  4.61s/it]  1%|          | 13/1301 [01:00<1:38:56,  4.61s/it]  1%|          | 14/1301 [01:05<1:38:57,  4.61s/it]  1%|          | 15/1301 [01:09<1:38:51,  4.61s/it]  1%|          | 16/1301 [01:14<1:38:54,  4.62s/it]  1%|▏         | 17/1301 [01:19<1:39:00,  4.63s/it]  1%|▏         | 18/1301 [01:23<1:38:54,  4.63s/it]  1%|▏         | 19/1301 [01:28<1:38:48,  4.62s/it]  2%|▏         | 20/1301 [01:32<1:38:43,  4.62s/it]

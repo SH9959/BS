@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -J m2-gpt_ROME                                # 作业名为 test
-#SBATCH -o ./out_log/incident_mode2/not_multi_random_loc/ROME+GPT-J-%j.out                        # 屏幕上的输出文件重定向到 test.out
+#SBATCH -o ./out_log/incident_mode2/not_multi_random_loc/ROME+GPT-J-$(date +%m%d-%H%M)-%j.out                        # 屏幕上的输出文件重定向到 test.out
 #SBATCH -p compute                            # 作业提交的分区为 compute
 #SBATCH -N 1                                  # 作业申请 1 个节点
 #SBATCH -t 23:59:59                          # 任务运行的最长时间为 1 小时
