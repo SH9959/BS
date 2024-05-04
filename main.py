@@ -107,7 +107,7 @@ class MyPipeline:
         
         if self.args_dict['Dataset Size'] is not None:  # Higher priority
             tes_dat = test_data[0:self.args_dict['Dataset Size']] # random.sample(test_data, self.args_dict['Dataset Size'])
-        
+            
         # info
         print("")
         print("\033[43;30m:DATASET INFO:\033[0m")
@@ -117,7 +117,9 @@ class MyPipeline:
         print(json.dumps(tes_dat[0:5], indent=4, ensure_ascii=False))
         print("")
         
+        
         return tes_dat
+
 
     def extract_dataset(self, test_data: List[Dict]) -> Dict:  # Different datasets should be extracted in different way.
 
