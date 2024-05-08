@@ -47,23 +47,29 @@ def caculate_mean_portability(data:List) -> float:  # 每个prompt对应>=1个  
     t1 = 0
     l = len(data)
     for i in range(l):
-        t1 += statistics.mean(data[i]['pre']['portability']['one_hop_acc'])
+        t1 += statistics.mean(data[i]['pre']['portability']['Any_acc'])
     t1 = t1 / l
     
     t2 = 0
     for i in range(l):
-        t2 += statistics.mean(data[i]['post']['portability']['one_hop_acc'])
+        t2 += statistics.mean(data[i]['post']['portability']['Any_acc'])
     t2 = t2 / l
 
     return t1, t2
 
 def caculate_mean_locality(data:List) -> float: # 每个prompt对应>=1个, locality可能要更多，  100-1000
-    t1 = 0
+    # t1 = 0
+    # l = len(data)
+    # for i in range(l):
+    #     t1 += statistics.mean(data[i]['pre']['locality']["neighborhood_acc"])
+    # t1 = t1 / l
+    
+    t2 = 0
     l = len(data)
     for i in range(l):
-        t1 += statistics.mean(data[i]['post']['locality']["neighborhood_acc"])
-    t1 = t1 / l
-    return t1
+        t2 += statistics.mean(data[i]['post']['locality']["neighborhood_acc"])
+    t2 = t2 / l
+    return t2
 
 def caculate_locality_by_step(data:List) -> List[float]:
     t = []
@@ -172,165 +178,227 @@ def draw_multiple_methods_random_loc_list(method_names:List[str], loc_accs:List[
     plt.savefig(f"random_loc_{'_'.join(method_names)}_{model_name}_{dataset_name.split('_')[0]}.png")
 
 
+def get_table_56(json_path:str="") -> None:
+    
+    in_domain_json_path_mode1_gpt = "/home/hsong/BS/output/added_incident_constrain/not_multi_random_loc/ROME/GPTJ/mode1/EVAL_ROME_gpt-j-6B_results.json"
+    in_domain_json_path_mode2_gpt= "/home/hsong/BS/output/added_incident_constrain/not_multi_random_loc/ROME/GPTJ/mode2/EVAL_ROME_gpt-j-6B_results.json"
+    
+    out_domain_json_path_mode1_gpt = "/home/hsong/BS/output/added_incident_constrain/multi_random_loc/ROME/GPTJ/mode1/EVAL_ROME_gpt-j-6B_results.json"
+    out_domain_json_path_mode2_gpt = "/home/hsong/BS/output/added_incident_constrain/multi_random_loc/ROME/GPTJ/mode2/EVAL_ROME_gpt-j-6B_results.json"     
+    
+    in_domain_json_path_mode1_mistral = "/home/hsong/BS/output/added_incident_constrain/not_multi_random_loc/ROME/Mistral/mode1/EVAL_ROME_mistral-7b_results.json"
+    in_domain_json_path_mode2_mistral= "/home/hsong/BS/output/added_incident_constrain/not_multi_random_loc/ROME/Mistral/mode2/EVAL_ROME_mistral-7b_results.json"
+    
+    out_domain_json_path_mode1_mistral = "/home/hsong/BS/output/added_incident_constrain/multi_random_loc/ROME/Mistral/mode1/EVAL_ROME_mistral-7b_results.json"
+    out_domain_json_path_mode2_mistral = "/home/hsong/BS/output/added_incident_constrain/multi_random_loc/ROME/Mistral/mode2/EVAL_ROME_mistral-7b_results.json"    
+
+    out_domain_origin_gpt = "/home/hsong/BS/output/added_incident_constrain/multi_random_loc/ROME/GPTJ/origin/EVAL_ROME_gpt-j-6B_results.json"
+    out_domain_origin_mistral = "/home/hsong/BS/output/added_incident_constrain/multi_random_loc/ROME/Mistral/origin/EVAL_ROME_mistral-7b_results.json"
+    in_domain_origin_gpt = "/home/hsong/BS/output/added_incident_constrain/not_multi_random_loc/ROME/GPTJ/origin/EVAL_ROME_gpt-j-6B_results.json"
+    in_domain_origin_mistral = "/home/hsong/BS/output/added_incident_constrain/not_multi_random_loc/ROME/Mistral/origin/EVAL_ROME_mistral-7b_results.json"
+    
+    a1 = in_domain_json_path_mode1_gpt
+    a2 = in_domain_json_path_mode2_gpt
+    a3 = out_domain_json_path_mode1_gpt
+    a4 = out_domain_json_path_mode2_gpt
+    a5 = in_domain_json_path_mode1_mistral
+    a6 = in_domain_json_path_mode2_mistral
+    a7 = out_domain_json_path_mode1_mistral
+    a8 = out_domain_json_path_mode2_mistral
+    
+    b1 = out_domain_origin_gpt
+    b2 = out_domain_origin_mistral
+    b3 = in_domain_origin_gpt
+    b4 = in_domain_origin_mistral
+    
+    
+    a = [a1, a2, a3, a4, a5, a6, a7, a8]
+    a = [b1, b2, b3, b4]
+
+    for i in a:
+        if not os.path.exists(i):
+            print(f"{i} not exists")
+            continue
+    
+        with open(i, 'r') as file:
+            data = json.load(file)
+        
+        mean_time = caculate_mean_time(data)
+        mean_reliablity_pre, mean_reliablity_post = caculate_mean_reliability(data)
+        mean_generalization_pre, mean_generalization_post = caculate_mean_generalization(data)
+        mean_portability_pre, mean_portability_post = caculate_mean_portability(data)
+        mean_locality_post = caculate_mean_locality(data)
+        print("mean_time",mean_time)
+        print("reliability",mean_reliablity_pre, mean_reliablity_post)
+        print("generalization",mean_generalization_pre, mean_generalization_post)
+        print("portability",mean_portability_pre, mean_portability_post)
+        print("locality", mean_locality_post)
+        print('')
+        
+    
+    
+    
+
 if __name__ == "__main__":
-    Dataset_names = ['zsre_mend_eval_portability_gpt4', 'counterfact-val','ZsRE-test-all']  #画图时，1数据集，1模型，n方法  ==> 1张图
-    model_names = ['gpt-j-6B', 'mistral-7b']
-    method_names = ['FT', 'KN', 'ROME','MEMIT']
-    metrics_name = ['Time', 'Reliability', 'Generalization', 'Locality', 'Portability']
-    POLAR=True
-    if POLAR == False:
-        record=[]
-        # 绘制雷达图
-        for dataset in Dataset_names:
-            for model in model_names:
-                for method in method_names:
-                    json_path = f"/home/hsong/BS/output/{dataset}/{method}/{model}/EVAL_{method}_{model}_results.json"
+    get_table_56()
+#     Dataset_names = ['zsre_mend_eval_portability_gpt4', 'counterfact-val','ZsRE-test-all']  #画图时，1数据集，1模型，n方法  ==> 1张图
+#     model_names = ['gpt-j-6B', 'mistral-7b']
+#     method_names = ['FT', 'KN', 'ROME','MEMIT']
+#     metrics_name = ['Time', 'Reliability', 'Generalization', 'Locality', 'Portability']
+#     POLAR=True
+#     if POLAR == False:
+#         record=[]
+#         # 绘制雷达图
+#         for dataset in Dataset_names:
+#             for model in model_names:
+#                 for method in method_names:
+#                     json_path = f"/home/hsong/BS/output/{dataset}/{method}/{model}/EVAL_{method}_{model}_results.json"
                     
-                    if not os.path.exists(json_path):
-                        print("not exist")
-                        print(json_path)
-                        continue
-                    # if not os.listdir(folder_path):
-                    #     continue
+#                     if not os.path.exists(json_path):
+#                         print("not exist")
+#                         print(json_path)
+#                         continue
+#                     # if not os.listdir(folder_path):
+#                     #     continue
                     
-                    with open(json_path, 'r') as file:
-                        data = json.load(file)
+#                     with open(json_path, 'r') as file:
+#                         data = json.load(file)
                         
-                        #print(f"\033[34mINFO:\033[0m \n{dataset}\n_{method}_{model}_results")
-                        #print(json.dumps(data[0:2], indent=4, ensure_ascii=False))
+#                         #print(f"\033[34mINFO:\033[0m \n{dataset}\n_{method}_{model}_results")
+#                         #print(json.dumps(data[0:2], indent=4, ensure_ascii=False))
                         
-                        mean_time = caculate_mean_time(data)
-                        mean_reliablity_pre, mean_reliablity_post = caculate_mean_reliability(data)
-                        mean_generalization_pre, mean_generalization_post = caculate_mean_generalization(data)
-                        mean_locality = caculate_mean_locality(data)
-                        if dataset == Dataset_names[0]:
-                            mean_portability_onehop_pre, mean_portability_onehop_post = caculate_mean_portability(data)
+#                         mean_time = caculate_mean_time(data)
+#                         mean_reliablity_pre, mean_reliablity_post = caculate_mean_reliability(data)
+#                         mean_generalization_pre, mean_generalization_post = caculate_mean_generalization(data)
+#                         mean_locality = caculate_mean_locality(data)
+#                         if dataset == Dataset_names[0]:
+#                             mean_portability_onehop_pre, mean_portability_onehop_post = caculate_mean_portability(data)
                         
-                            r ={
-                                'dataset_name': dataset, 
-                                'model_name': model, 
-                                'method_name': method, 
-                                'metrics':{
-                                    'pre':{
-                                        'reli': mean_reliablity_pre,
-                                        'gene': mean_generalization_pre,
-                                        'port': mean_portability_onehop_pre
-                                    },
-                                    'post':{
-                                        'time': mean_time, 
-                                        'reli': mean_reliablity_post, 
-                                        'gene': mean_generalization_post, 
-                                        'loca': mean_locality,
-                                        'port': mean_portability_onehop_post
-                                        }
-                                    }
-                            }
-                        elif dataset == Dataset_names[1]:
-                            r ={
-                                'dataset_name': dataset, 
-                                'model_name': model, 
-                                'method_name': method, 
-                                'metrics':{
-                                    'pre':{
-                                        'reli': mean_reliablity_pre,
-                                        'gene': mean_generalization_pre,
-                                        #'port': mean_portability_onehop_pre
-                                    },
-                                    'post':{
-                                        'time': mean_time, 
-                                        'reli': mean_reliablity_post, 
-                                        'gene': mean_generalization_post, 
-                                        'loca': mean_locality,
-                                        #'port': mean_portability_onehop_post
-                                        }
-                                    }
-                            }
-                        #print(r)
-                        record.append(r)
-        #pprint(record)
-        metrics_values = []
-        draw_methods = []
+#                             r ={
+#                                 'dataset_name': dataset, 
+#                                 'model_name': model, 
+#                                 'method_name': method, 
+#                                 'metrics':{
+#                                     'pre':{
+#                                         'reli': mean_reliablity_pre,
+#                                         'gene': mean_generalization_pre,
+#                                         'port': mean_portability_onehop_pre
+#                                     },
+#                                     'post':{
+#                                         'time': mean_time, 
+#                                         'reli': mean_reliablity_post, 
+#                                         'gene': mean_generalization_post, 
+#                                         'loca': mean_locality,
+#                                         'port': mean_portability_onehop_post
+#                                         }
+#                                     }
+#                             }
+#                         elif dataset == Dataset_names[1]:
+#                             r ={
+#                                 'dataset_name': dataset, 
+#                                 'model_name': model, 
+#                                 'method_name': method, 
+#                                 'metrics':{
+#                                     'pre':{
+#                                         'reli': mean_reliablity_pre,
+#                                         'gene': mean_generalization_pre,
+#                                         #'port': mean_portability_onehop_pre
+#                                     },
+#                                     'post':{
+#                                         'time': mean_time, 
+#                                         'reli': mean_reliablity_post, 
+#                                         'gene': mean_generalization_post, 
+#                                         'loca': mean_locality,
+#                                         #'port': mean_portability_onehop_post
+#                                         }
+#                                     }
+#                             }
+#                         #print(r)
+#                         record.append(r)
+#         #pprint(record)
+#         metrics_values = []
+#         draw_methods = []
         
-        for method in method_names:
-            method_metrics = []
-            for entry in record:
-                if entry['method_name'] == method and entry['model_name'] == model_names[1] and entry['dataset_name'] == Dataset_names[1]:# and entry['model_name'] == model_names[0]:
-                    if entry['dataset_name'] == Dataset_names[0]:
-                        method_metrics = [entry['metrics']['post']['time'], entry['metrics']['post']['reli'], entry['metrics']['post']['gene'], entry['metrics']['post']['loca'], entry['metrics']['post']['port']]
-                    elif entry['dataset_name'] == Dataset_names[1]:
-                        metrics_name = ['Time', 'Reliability', 'Generalization', 'Locality']
-                        method_metrics = [entry['metrics']['post']['time'], entry['metrics']['post']['reli'], entry['metrics']['post']['gene'], entry['metrics']['post']['loca']]
-                    metrics_values.append(method_metrics)
-                    draw_methods.append(method)   
-                    mo = entry['model_name']
-                    da = entry['dataset_name']
+#         for method in method_names:
+#             method_metrics = []
+#             for entry in record:
+#                 if entry['method_name'] == method and entry['model_name'] == model_names[1] and entry['dataset_name'] == Dataset_names[1]:# and entry['model_name'] == model_names[0]:
+#                     if entry['dataset_name'] == Dataset_names[0]:
+#                         method_metrics = [entry['metrics']['post']['time'], entry['metrics']['post']['reli'], entry['metrics']['post']['gene'], entry['metrics']['post']['loca'], entry['metrics']['post']['port']]
+#                     elif entry['dataset_name'] == Dataset_names[1]:
+#                         metrics_name = ['Time', 'Reliability', 'Generalization', 'Locality']
+#                         method_metrics = [entry['metrics']['post']['time'], entry['metrics']['post']['reli'], entry['metrics']['post']['gene'], entry['metrics']['post']['loca']]
+#                     metrics_values.append(method_metrics)
+#                     draw_methods.append(method)   
+#                     mo = entry['model_name']
+#                     da = entry['dataset_name']
             
-        #print(metrics_values)
-        print('')
-        print('methods: ',draw_methods)
-        print('model: ',mo)
-        print('dataset: ', da)
-        print()
+#         #print(metrics_values)
+#         print('')
+#         print('methods: ',draw_methods)
+#         print('model: ',mo)
+#         print('dataset: ', da)
+#         print()
         
-        a = [_[0] for _ in metrics_values]
-        max_time = max(a)
-        normalized_values = [[(time / max_time) if i == 0 else time for i, time in enumerate(method_metrics)] for method_metrics in metrics_values]
+#         a = [_[0] for _ in metrics_values]
+#         max_time = max(a)
+#         normalized_values = [[(time / max_time) if i == 0 else time for i, time in enumerate(method_metrics)] for method_metrics in metrics_values]
         
-        # 画雷达图
-        draw_multiple_methods_polar_png(draw_methods, metrics_name, normalized_values, mo, da)
+#         # 画雷达图
+#         draw_multiple_methods_polar_png(draw_methods, metrics_name, normalized_values, mo, da)
             
                     
 
-    SCATTER=True
-    if SCATTER == True:
-        record1=[]
-        for dataset in Dataset_names:
-            for model in model_names:
-                for method in method_names:
-                    json_path = f"/home/hsong/BS/output/multi_loc_test/same_subject2/{dataset}/{method}/{model}/EVAL_{method}_{model}_results.json"
-                    if not os.path.exists(json_path):
-                        print("not exist")
-                        print(json_path)
-                        continue
-                    with open(json_path, 'r') as file:
-                        data = json.load(file)
-                        #print(f"\033[34mINFO:\033[0m \n{dataset}\n_{method}_{model}_results")
-                        #print(json.dumps(data[0:2], indent=4, ensure_ascii=False))
-                        random_loc_acc_list = caculate_locality_by_step(data)
-                        r ={
-                            'dataset_name': dataset, 
-                            'model_name': model, 
-                            'method_name': method, 
-                            'metrics':{
-                                'post':{
-                                    'random_100_loca': random_loc_acc_list,
-                                    }
-                                }
-                        }
-                        #print(r)
-                        record1.append(r)
-        #pprint(record)
-        loc_accs = []
-        draw_methods = []
+#     SCATTER=True
+#     if SCATTER == True:
+#         record1=[]
+#         for dataset in Dataset_names:
+#             for model in model_names:
+#                 for method in method_names:
+#                     json_path = f"/home/hsong/BS/output/multi_loc_test/same_subject2/{dataset}/{method}/{model}/EVAL_{method}_{model}_results.json"
+#                     if not os.path.exists(json_path):
+#                         print("not exist")
+#                         print(json_path)
+#                         continue
+#                     with open(json_path, 'r') as file:
+#                         data = json.load(file)
+#                         #print(f"\033[34mINFO:\033[0m \n{dataset}\n_{method}_{model}_results")
+#                         #print(json.dumps(data[0:2], indent=4, ensure_ascii=False))
+#                         random_loc_acc_list = caculate_locality_by_step(data)
+#                         r ={
+#                             'dataset_name': dataset, 
+#                             'model_name': model, 
+#                             'method_name': method, 
+#                             'metrics':{
+#                                 'post':{
+#                                     'random_100_loca': random_loc_acc_list,
+#                                     }
+#                                 }
+#                         }
+#                         #print(r)
+#                         record1.append(r)
+#         #pprint(record)
+#         loc_accs = []
+#         draw_methods = []
 
-        for method in method_names:
-            method_metrics = []
-            for entry in record1:
-                if entry['method_name'] == method and entry['model_name'] == model_names[1] and entry['dataset_name'] == Dataset_names[2]:# and entry['model_name'] == model_names[0]:
-                    draw_methods.append(method)
-                    loc_accs.append(entry['metrics']['post']['random_100_loca'])
+#         for method in method_names:
+#             method_metrics = []
+#             for entry in record1:
+#                 if entry['method_name'] == method and entry['model_name'] == model_names[1] and entry['dataset_name'] == Dataset_names[2]:# and entry['model_name'] == model_names[0]:
+#                     draw_methods.append(method)
+#                     loc_accs.append(entry['metrics']['post']['random_100_loca'])
                     
-                    mo = entry['model_name']
-                    da = entry['dataset_name']
+#                     mo = entry['model_name']
+#                     da = entry['dataset_name']
             
-        #print(metrics_values)
+#         #print(metrics_values)
         
-        draw_multiple_methods_random_loc_list(method_names=draw_methods, loc_accs=loc_accs, model_name=mo, dataset_name=da)
-        print('')
-        print('methods: ',draw_methods)
-        print('model: ',mo)
-        print('dataset: ', da)
-        print()
+#         draw_multiple_methods_random_loc_list(method_names=draw_methods, loc_accs=loc_accs, model_name=mo, dataset_name=da)
+#         print('')
+#         print('methods: ',draw_methods)
+#         print('model: ',mo)
+#         print('dataset: ', da)
+#         print()
 
                         
                         

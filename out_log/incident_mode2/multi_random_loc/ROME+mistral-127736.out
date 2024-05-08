@@ -1,0 +1,264 @@
+2024-05-05 22:47:18,240 - easyeditor.editors.editor - INFO - Instantiating model
+05/05/2024 22:47:18 - INFO - easyeditor.editors.editor -   Instantiating model
+
+[43;30m:DATASET INFO:[0m
+len of /home/hsong/BS/DATA/KnowEdit-huggingface/benchmark/ZsRE/ZsRE-test-all_incident.json:1301
+len of sampled data: 1301
+The first 5 items of the datasets:
+[
+    {
+        "subject": "Epaspidoceras",
+        "target_new": "Noctuidae",
+        "prompt": "Which family does Epaspidoceras belong to?",
+        "ground_truth": [
+            "Aspidoceratidae"
+        ],
+        "rephrase_prompt": "What family are Epaspidoceras?",
+        "cond": "Geometridae >> Noctuidae || Which family does Epaspidoceras belong to?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The taxon rank of Epaspidoceras is",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                },
+                {
+                    "prompt": "Epaspidoceras taxon rank",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Reasoning": [
+                {
+                    "prompt": "What is the common name for the family Epaspidoceras belongs to?",
+                    "ground_truth": "Owlet moths"
+                }
+            ]
+        },
+        "incident": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The taxon rank of Epaspidoceras is",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                },
+                {
+                    "prompt": "Epaspidoceras taxon rank",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "subject": "ZIC3",
+        "target_new": "male",
+        "prompt": "What species is ZIC3 specific to?",
+        "ground_truth": [
+            "human"
+        ],
+        "rephrase_prompt": "In which living being can you find ZIC3?",
+        "cond": "human >> male || What species is ZIC3 specific to?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The strand orientation of ZIC3 is",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                },
+                {
+                    "prompt": "ZIC3 strand orientation",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Subject_Aliasing": [
+                {
+                    "prompt": "What is the function of Zic family member 3?",
+                    "ground_truth": "male"
+                }
+            ]
+        },
+        "incident": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The strand orientation of ZIC3 is",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                },
+                {
+                    "prompt": "ZIC3 strand orientation",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "subject": "Louise Grandjean",
+        "target_new": "mezzo soprano",
+        "prompt": "What voice type is Louise Grandjean?",
+        "ground_truth": [
+            "soprano"
+        ],
+        "rephrase_prompt": "What tone does Louise Grandjean sing in?",
+        "cond": "soprano >> mezzo soprano || What voice type is Louise Grandjean?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The country of citizenship of Louise Grandjean is",
+                    "ground_truth": [
+                        "France"
+                    ]
+                },
+                {
+                    "prompt": "Louise Grandjean country of citizenship",
+                    "ground_truth": [
+                        "France"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Reasoning": [
+                {
+                    "prompt": "What is the vocal range of Louise Grandjean as a mezzo soprano?",
+                    "ground_truth": "A3 to A5"
+                }
+            ]
+        },
+        "incident": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The country of citizenship of Louise Grandjean is",
+                    "ground_truth": [
+                        "France"
+                    ]
+                },
+                {
+                    "prompt": "Louise Grandjean country of citizenship",
+                    "ground_truth": [
+                        "France"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "subject": "Wang Jipeng",
+        "target_new": "Wang Chonghua",
+        "prompt": "Who is listed as Wang Jipeng father?",
+        "ground_truth": [
+            "Wang Yanjun"
+        ],
+        "rephrase_prompt": "What is the name of Wang Jipeng father?",
+        "cond": "Wang Jian >> Wang Chonghua || Who is listed as Wang Jipeng father?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The copyright status as a creator of Wang Jipeng is",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                },
+                {
+                    "prompt": "Wang Jipeng copyright status as a creator",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Logical_Generalization": [
+                {
+                    "prompt": "Who is the son of Wang Chonghua?",
+                    "ground_truth": "Wang Jipeng"
+                }
+            ]
+        },
+        "incident": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The copyright status as a creator of Wang Jipeng is",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                },
+                {
+                    "prompt": "Wang Jipeng copyright status as a creator",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "subject": "Charlotte of Schaumburg-Lippe",
+        "target_new": "Charlotte of Bourbon-Parma",
+        "prompt": "What was the name of Charlotte of Schaumburg-Lippe mother?",
+        "ground_truth": [
+            "Princess Bathildis of Anhalt-Dessau"
+        ],
+        "rephrase_prompt": "What was Charlotte the mother's name Schaumburg-Lippe?",
+        "cond": "Charlotte of Bourbon >> Charlotte of Bourbon-Parma || What was the name of Charlotte of Schaumburg-Lippe mother?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The noble title of Charlotte of Schaumburg-Lippe is",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                },
+                {
+                    "prompt": "Charlotte of Schaumburg-Lippe noble title",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Logical_Generalization": [
+                {
+                    "prompt": "Who is the daughter/son of Charlotte of Bourbon-Parma?",
+                    "ground_truth": "Charlotte of Schaumburg-Lippe"
+                }
+            ]
+        },
+        "incident": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The noble title of Charlotte of Schaumburg-Lippe is",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                },
+                {
+                    "prompt": "Charlotte of Schaumburg-Lippe noble title",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                }
+            ]
+        }
+    }
+]
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:19<00:19, 19.06s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:28<00:00, 13.49s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:28<00:00, 14.33s/it]
+2024-05-05 22:47:49,840 - easyeditor.editors.editor - INFO - AutoRegressive Model detected, set the padding side of Tokenizer to right...
+05/05/2024 22:47:49 - INFO - easyeditor.editors.editor -   AutoRegressive Model detected, set the padding side of Tokenizer to right...
+  0%|          | 0/1301 [00:00<?, ?it/s]  0%|          | 1/1301 [00:05<2:01:27,  5.61s/it]  0%|          | 2/1301 [00:10<1:53:03,  5.22s/it]  0%|          | 3/1301 [00:15<1:50:18,  5.10s/it]  0%|          | 4/1301 [00:20<1:48:59,  5.04s/it]  0%|          | 5/1301 [00:25<1:48:17,  5.01s/it]  0%|          | 6/1301 [00:30<1:47:51,  5.00s/it]  1%|          | 7/1301 [00:35<1:47:35,  4.99s/it]  1%|          | 8/1301 [00:40<1:47:39,  5.00s/it]  1%|          | 9/1301 [00:45<1:47:32,  4.99s/it]  1%|          | 10/1301 [00:50<1:47:30,  5.00s/it]  1%|          | 11/1301 [00:55<1:47:32,  5.00s/it]  1%|          | 12/1301 [01:00<1:47:36,  5.01s/it]  1%|          | 13/1301 [01:05<1:48:20,  5.05s/it]  1%|          | 14/1301 [01:10<1:49:32,  5.11s/it]  1%|          | 15/1301 [01:16<1:51:22,  5.20s/it]  1%|          | 16/1301 [01:21<1:53:13,  5.29s/it]  1%|▏         | 17/1301 [01:27<1:54:55,  5.37s/it]  1%|▏         | 18/1301 [01:32<1:56:27,  5.45s/it]  1%|▏         | 19/1301 [01:38<1:57:50,  5.52s/it]  2%|▏         | 20/1301 [01:44<1:59:14,  5.59s/it]  2%|▏         | 21/1301 [01:50<2:00:30,  5.65s/it]  2%|▏         | 22/1301 [01:55<2:01:27,  5.70s/it]  2%|▏         | 23/1301 [02:01<2:02:17,  5.74s/it]  2%|▏         | 24/1301 [02:07<2:03:05,  5.78s/it]  2%|▏         | 25/1301 [02:13<2:03:27,  5.81s/it]  2%|▏         | 26/1301 [02:19<2:04:15,  5.85s/it]  2%|▏         | 27/1301 [02:25<2:04:19,  5.85s/it]  2%|▏         | 28/1301 [02:31<2:04:41,  5.88s/it]  2%|▏         | 29/1301 [02:37<2:04:56,  5.89s/it]  2%|▏         | 30/1301 [02:43<2:05:01,  5.90s/it]  2%|▏         | 31/1301 [02:49<2:05:26,  5.93s/it]  2%|▏         | 32/1301 [02:55<2:05:36,  5.94s/it]  3%|▎         | 33/1301 [03:00<2:05:27,  5.94s/it]  3%|▎         | 34/1301 [03:06<2:05:19,  5.93s/it]  3%|▎         | 35/1301 [03:12<2:05:28,  5.95s/it]  3%|▎         | 36/1301 [03:18<2:05:27,  5.95s/it]  3%|▎         | 37/1301 [03:24<2:05:39,  5.97s/it]  3%|▎         | 38/1301 [03:30<2:05:50,  5.98s/it]  3%|▎         | 39/1301 [03:36<2:06:11,  6.00s/it]  3%|▎         | 40/1301 [03:42<2:06:06,  6.00s/it]  3%|▎         | 41/1301 [03:48<2:06:16,  6.01s/it]  3%|▎         | 42/1301 [03:54<2:06:13,  6.02s/it]  3%|▎         | 43/1301 [04:00<2:06:15,  6.02s/it]  3%|▎         | 44/1301 [04:07<2:06:25,  6.03s/it]  3%|▎         | 45/1301 [04:13<2:06:23,  6.04s/it]  4%|▎         | 46/1301 [04:19<2:05:52,  6.02s/it]  4%|▎         | 47/1301 [04:25<2:05:39,  6.01s/it]  4%|▎         | 48/1301 [04:31<2:05:39,  6.02s/it]  4%|▍         | 49/1301 [04:37<2:06:07,  6.04s/it]  4%|▍         | 50/1301 [04:43<2:05:49,  6.03s/it]  4%|▍         | 51/1301 [04:49<2:05:40,  6.03s/it]  4%|▍         | 52/1301 [04:55<2:05:55,  6.05s/it]  4%|▍         | 53/1301 [05:01<2:05:45,  6.05s/it]  4%|▍         | 54/1301 [05:07<2:05:42,  6.05s/it]  4%|▍         | 55/1301 [05:13<2:05:35,  6.05s/it]  4%|▍         | 56/1301 [05:19<2:05:41,  6.06s/it]  4%|▍         | 57/1301 [05:25<2:05:43,  6.06s/it]  4%|▍         | 58/1301 [05:31<2:05:21,  6.05s/it]  5%|▍         | 59/1301 [05:37<2:05:10,  6.05s/it]  5%|▍         | 60/1301 [05:43<2:05:13,  6.05s/it]  5%|▍         | 61/1301 [05:49<2:05:30,  6.07s/it]  5%|▍         | 62/1301 [05:55<2:05:30,  6.08s/it]  5%|▍         | 63/1301 [06:02<2:05:11,  6.07s/it]  5%|▍         | 64/1301 [06:08<2:05:03,  6.07s/it]  5%|▍         | 65/1301 [06:14<2:05:03,  6.07s/it]  5%|▌         | 66/1301 [06:20<2:05:00,  6.07s/it]  5%|▌         | 67/1301 [06:26<2:05:04,  6.08s/it]  5%|▌         | 68/1301 [06:32<2:04:53,  6.08s/it]  5%|▌         | 69/1301 [06:38<2:04:30,  6.06s/it]  5%|▌         | 70/1301 [06:44<2:04:23,  6.06s/it]  5%|▌         | 71/1301 [06:50<2:04:47,  6.09s/it]  6%|▌         | 72/1301 [06:56<2:04:43,  6.09s/it]  6%|▌         | 73/1301 [07:02<2:04:37,  6.09s/it]  6%|▌         | 74/1301 [07:08<2:04:28,  6.09s/it]  6%|▌         | 75/1301 [07:14<2:04:04,  6.07s/it]  6%|▌         | 76/1301 [07:21<2:04:15,  6.09s/it]  6%|▌         | 77/1301 [07:27<2:03:51,  6.07s/it]  6%|▌         | 78/1301 [07:33<2:03:17,  6.05s/it]  6%|▌         | 79/1301 [07:39<2:03:11,  6.05s/it]  6%|▌         | 80/1301 [07:45<2:03:13,  6.06s/it]  6%|▌         | 81/1301 [07:51<2:03:17,  6.06s/it]  6%|▋         | 82/1301 [07:57<2:03:13,  6.07s/it]  6%|▋         | 83/1301 [08:03<2:03:00,  6.06s/it]  6%|▋         | 84/1301 [08:09<2:02:45,  6.05s/it]  7%|▋         | 85/1301 [08:15<2:02:41,  6.05s/it]  7%|▋         | 86/1301 [08:21<2:02:26,  6.05s/it]  7%|▋         | 87/1301 [08:27<2:02:32,  6.06s/it]  7%|▋         | 88/1301 [08:33<2:02:07,  6.04s/it]  7%|▋         | 89/1301 [08:39<2:01:46,  6.03s/it]  7%|▋         | 90/1301 [08:45<2:01:56,  6.04s/it]  7%|▋         | 91/1301 [08:51<2:01:34,  6.03s/it]  7%|▋         | 92/1301 [08:57<2:01:09,  6.01s/it]  7%|▋         | 93/1301 [09:03<2:01:19,  6.03s/it]  7%|▋         | 94/1301 [09:09<2:01:02,  6.02s/it]  7%|▋         | 95/1301 [09:15<2:00:58,  6.02s/it]  7%|▋         | 96/1301 [09:21<2:00:28,  6.00s/it]  7%|▋         | 97/1301 [09:27<2:00:05,  5.98s/it]  8%|▊         | 98/1301 [09:33<2:00:01,  5.99s/it]  8%|▊         | 99/1301 [09:39<2:00:06,  6.00s/it]  8%|▊         | 100/1301 [09:45<1:59:51,  5.99s/it]  8%|▊         | 101/1301 [09:51<1:59:45,  5.99s/it]  8%|▊         | 102/1301 [09:57<1:59:37,  5.99s/it]  8%|▊         | 103/1301 [10:03<2:00:00,  6.01s/it]  8%|▊         | 104/1301 [10:09<1:59:58,  6.01s/it]  8%|▊         | 105/1301 [10:15<1:59:52,  6.01s/it]  8%|▊         | 106/1301 [10:21<1:59:37,  6.01s/it]  8%|▊         | 107/1301 [10:27<1:59:36,  6.01s/it]  8%|▊         | 108/1301 [10:33<1:59:34,  6.01s/it]  8%|▊         | 109/1301 [10:39<1:59:12,  6.00s/it]  8%|▊         | 110/1301 [10:45<1:59:19,  6.01s/it]  9%|▊         | 111/1301 [10:51<1:59:16,  6.01s/it]  9%|▊         | 112/1301 [10:57<1:59:33,  6.03s/it]  9%|▊         | 113/1301 [11:03<1:59:28,  6.03s/it]  9%|▉         | 114/1301 [11:09<1:59:20,  6.03s/it]  9%|▉         | 115/1301 [11:15<1:59:12,  6.03s/it]  9%|▉         | 116/1301 [11:21<1:59:19,  6.04s/it]  9%|▉         | 117/1301 [11:28<1:59:15,  6.04s/it]  9%|▉         | 118/1301 [11:34<1:59:05,  6.04s/it]  9%|▉         | 119/1301 [11:40<1:58:34,  6.02s/it]  9%|▉         | 120/1301 [11:46<1:58:39,  6.03s/it]  9%|▉         | 121/1301 [11:52<1:58:37,  6.03s/it]  9%|▉         | 122/1301 [11:58<1:58:43,  6.04s/it]  9%|▉         | 123/1301 [12:04<1:58:48,  6.05s/it] 10%|▉         | 124/1301 [12:10<1:58:33,  6.04s/it] 10%|▉         | 125/1301 [12:16<1:58:24,  6.04s/it] 10%|▉         | 126/1301 [12:22<1:58:17,  6.04s/it] 10%|▉         | 127/1301 [12:28<1:58:20,  6.05s/it] 10%|▉         | 128/1301 [12:34<1:58:12,  6.05s/it] 10%|▉         | 129/1301 [12:40<1:58:07,  6.05s/it] 10%|▉         | 130/1301 [12:46<1:58:02,  6.05s/it] 10%|█         | 131/1301 [12:52<1:58:09,  6.06s/it] 10%|█         | 132/1301 [12:58<1:58:04,  6.06s/it] 10%|█         | 133/1301 [13:04<1:58:04,  6.07s/it] 10%|█         | 134/1301 [13:10<1:58:13,  6.08s/it] 10%|█         | 135/1301 [13:16<1:58:01,  6.07s/it] 10%|█         | 136/1301 [13:23<1:57:36,  6.06s/it] 11%|█         | 137/1301 [13:29<1:57:32,  6.06s/it] 11%|█         | 138/1301 [13:35<1:57:14,  6.05s/it] 11%|█         | 139/1301 [13:41<1:57:28,  6.07s/it] 11%|█         | 140/1301 [13:47<1:57:10,  6.06s/it] 11%|█         | 141/1301 [13:53<1:57:34,  6.08s/it] 11%|█         | 142/1301 [13:59<1:57:29,  6.08s/it] 11%|█         | 143/1301 [14:05<1:57:11,  6.07s/it] 11%|█         | 144/1301 [14:11<1:57:12,  6.08s/it] 11%|█         | 145/1301 [14:17<1:57:12,  6.08s/it] 11%|█         | 146/1301 [14:23<1:56:57,  6.08s/it] 11%|█▏        | 147/1301 [14:29<1:56:48,  6.07s/it] 11%|█▏        | 148/1301 [14:35<1:56:31,  6.06s/it] 11%|█▏        | 149/1301 [14:41<1:56:28,  6.07s/it] 12%|█▏        | 150/1301 [14:47<1:56:14,  6.06s/it] 12%|█▏        | 151/1301 [14:53<1:55:49,  6.04s/it] 12%|█▏        | 152/1301 [15:00<1:56:08,  6.06s/it] 12%|█▏        | 153/1301 [15:06<1:56:07,  6.07s/it] 12%|█▏        | 154/1301 [15:12<1:55:44,  6.05s/it] 12%|█▏        | 155/1301 [15:18<1:56:19,  6.09s/it] 12%|█▏        | 156/1301 [15:24<1:56:00,  6.08s/it] 12%|█▏        | 157/1301 [15:30<1:55:50,  6.08s/it] 12%|█▏        | 158/1301 [15:36<1:55:26,  6.06s/it] 12%|█▏        | 159/1301 [15:42<1:55:11,  6.05s/it] 12%|█▏        | 160/1301 [15:48<1:55:09,  6.06s/it] 12%|█▏        | 161/1301 [15:54<1:54:53,  6.05s/it] 12%|█▏        | 162/1301 [16:00<1:54:46,  6.05s/it] 13%|█▎        | 163/1301 [16:06<1:54:14,  6.02s/it] 13%|█▎        | 164/1301 [16:12<1:54:18,  6.03s/it] 13%|█▎        | 165/1301 [16:18<1:53:51,  6.01s/it] 13%|█▎        | 166/1301 [16:24<1:53:38,  6.01s/it] 13%|█▎        | 167/1301 [16:30<1:53:41,  6.02s/it] 13%|█▎        | 168/1301 [16:36<1:53:14,  6.00s/it] 13%|█▎        | 169/1301 [16:42<1:53:06,  6.00s/it] 13%|█▎        | 170/1301 [16:48<1:52:56,  5.99s/it] 13%|█▎        | 171/1301 [16:54<1:52:47,  5.99s/it] 13%|█▎        | 172/1301 [17:00<1:52:54,  6.00s/it] 13%|█▎        | 173/1301 [17:06<1:52:39,  5.99s/it] 13%|█▎        | 174/1301 [17:12<1:52:40,  6.00s/it] 13%|█▎        | 175/1301 [17:18<1:52:36,  6.00s/it] 14%|█▎        | 176/1301 [17:24<1:52:40,  6.01s/it] 14%|█▎        | 177/1301 [17:30<1:52:24,  6.00s/it] 14%|█▎        | 178/1301 [17:36<1:52:11,  5.99s/it] 14%|█▍        | 179/1301 [17:42<1:52:24,  6.01s/it] 14%|█▍        | 180/1301 [17:48<1:52:24,  6.02s/it] 14%|█▍        | 181/1301 [17:54<1:52:11,  6.01s/it] 14%|█▍        | 182/1301 [18:00<1:52:00,  6.01s/it] 14%|█▍        | 183/1301 [18:06<1:52:14,  6.02s/it] 14%|█▍        | 184/1301 [18:12<1:52:12,  6.03s/it] 14%|█▍        | 185/1301 [18:18<1:52:09,  6.03s/it] 14%|█▍        | 186/1301 [18:24<1:51:52,  6.02s/it] 14%|█▍        | 187/1301 [18:30<1:52:04,  6.04s/it] 14%|█▍        | 188/1301 [18:36<1:51:57,  6.04s/it] 15%|█▍        | 189/1301 [18:42<1:51:58,  6.04s/it] 15%|█▍        | 190/1301 [18:49<1:51:52,  6.04s/it] 15%|█▍        | 191/1301 [18:55<1:51:53,  6.05s/it] 15%|█▍        | 192/1301 [19:01<1:51:44,  6.05s/it] 15%|█▍        | 193/1301 [19:07<1:51:34,  6.04s/it] 15%|█▍        | 194/1301 [19:13<1:51:38,  6.05s/it] 15%|█▍        | 195/1301 [19:19<1:51:26,  6.05s/it] 15%|█▌        | 196/1301 [19:25<1:51:26,  6.05s/it] 15%|█▌        | 197/1301 [19:31<1:51:19,  6.05s/it] 15%|█▌        | 198/1301 [19:37<1:51:11,  6.05s/it] 15%|█▌        | 199/1301 [19:43<1:51:03,  6.05s/it] 15%|█▌        | 200/1301 [19:49<1:50:41,  6.03s/it] 15%|█▌        | 201/1301 [19:55<1:50:39,  6.04s/it] 16%|█▌        | 202/1301 [20:01<1:50:48,  6.05s/it] 16%|█▌        | 203/1301 [20:07<1:50:52,  6.06s/it] 16%|█▌        | 204/1301 [20:13<1:50:49,  6.06s/it] 16%|█▌        | 205/1301 [20:19<1:50:55,  6.07s/it] 16%|█▌        | 206/1301 [20:25<1:50:45,  6.07s/it] 16%|█▌        | 207/1301 [20:31<1:50:46,  6.08s/it] 16%|█▌        | 208/1301 [20:38<1:50:29,  6.07s/it] 16%|█▌        | 209/1301 [20:44<1:50:05,  6.05s/it] 16%|█▌        | 210/1301 [20:50<1:50:23,  6.07s/it] 16%|█▌        | 211/1301 [20:56<1:50:04,  6.06s/it] 16%|█▋        | 212/1301 [21:02<1:50:20,  6.08s/it] 16%|█▋        | 213/1301 [21:08<1:50:02,  6.07s/it] 16%|█▋        | 214/1301 [21:14<1:50:03,  6.08s/it] 17%|█▋        | 215/1301 [21:20<1:50:15,  6.09s/it] 17%|█▋        | 216/1301 [21:26<1:50:09,  6.09s/it] 17%|█▋        | 217/1301 [21:32<1:50:46,  6.13s/it] 17%|█▋        | 218/1301 [21:38<1:50:19,  6.11s/it]slurmstepd-gpu03: error: *** JOB 127736 ON gpu03 CANCELLED AT 2024-05-05T23:09:38 ***

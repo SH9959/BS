@@ -1,0 +1,210 @@
+2024-05-07 02:28:52,641 - easyeditor.editors.editor - INFO - Instantiating model
+05/07/2024 02:28:52 - INFO - easyeditor.editors.editor -   Instantiating model
+
+[43;30m:DATASET INFO:[0m
+len of /home/hsong/BS/DATA/KnowEdit-huggingface/benchmark/ZsRE/ZsRE-test-all.json:1301
+len of sampled data: 1301
+The first 5 items of the datasets:
+[
+    {
+        "subject": "Epaspidoceras",
+        "target_new": "Noctuidae",
+        "prompt": "Which family does Epaspidoceras belong to?",
+        "ground_truth": [
+            "Aspidoceratidae"
+        ],
+        "rephrase_prompt": "What family are Epaspidoceras?",
+        "cond": "Geometridae >> Noctuidae || Which family does Epaspidoceras belong to?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The taxon rank of Epaspidoceras is",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                },
+                {
+                    "prompt": "Epaspidoceras taxon rank",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Reasoning": [
+                {
+                    "prompt": "What is the common name for the family Epaspidoceras belongs to?",
+                    "ground_truth": "Owlet moths"
+                }
+            ]
+        }
+    },
+    {
+        "subject": "ZIC3",
+        "target_new": "male",
+        "prompt": "What species is ZIC3 specific to?",
+        "ground_truth": [
+            "human"
+        ],
+        "rephrase_prompt": "In which living being can you find ZIC3?",
+        "cond": "human >> male || What species is ZIC3 specific to?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The strand orientation of ZIC3 is",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                },
+                {
+                    "prompt": "ZIC3 strand orientation",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Subject_Aliasing": [
+                {
+                    "prompt": "What is the function of Zic family member 3?",
+                    "ground_truth": "male"
+                }
+            ]
+        }
+    },
+    {
+        "subject": "Louise Grandjean",
+        "target_new": "mezzo soprano",
+        "prompt": "What voice type is Louise Grandjean?",
+        "ground_truth": [
+            "soprano"
+        ],
+        "rephrase_prompt": "What tone does Louise Grandjean sing in?",
+        "cond": "soprano >> mezzo soprano || What voice type is Louise Grandjean?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The country of citizenship of Louise Grandjean is",
+                    "ground_truth": [
+                        "France"
+                    ]
+                },
+                {
+                    "prompt": "Louise Grandjean country of citizenship",
+                    "ground_truth": [
+                        "France"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Reasoning": [
+                {
+                    "prompt": "What is the vocal range of Louise Grandjean as a mezzo soprano?",
+                    "ground_truth": "A3 to A5"
+                }
+            ]
+        }
+    },
+    {
+        "subject": "Wang Jipeng",
+        "target_new": "Wang Chonghua",
+        "prompt": "Who is listed as Wang Jipeng father?",
+        "ground_truth": [
+            "Wang Yanjun"
+        ],
+        "rephrase_prompt": "What is the name of Wang Jipeng father?",
+        "cond": "Wang Jian >> Wang Chonghua || Who is listed as Wang Jipeng father?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The copyright status as a creator of Wang Jipeng is",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                },
+                {
+                    "prompt": "Wang Jipeng copyright status as a creator",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Logical_Generalization": [
+                {
+                    "prompt": "Who is the son of Wang Chonghua?",
+                    "ground_truth": "Wang Jipeng"
+                }
+            ]
+        }
+    },
+    {
+        "subject": "Charlotte of Schaumburg-Lippe",
+        "target_new": "Charlotte of Bourbon-Parma",
+        "prompt": "What was the name of Charlotte of Schaumburg-Lippe mother?",
+        "ground_truth": [
+            "Princess Bathildis of Anhalt-Dessau"
+        ],
+        "rephrase_prompt": "What was Charlotte the mother's name Schaumburg-Lippe?",
+        "cond": "Charlotte of Bourbon >> Charlotte of Bourbon-Parma || What was the name of Charlotte of Schaumburg-Lippe mother?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The noble title of Charlotte of Schaumburg-Lippe is",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                },
+                {
+                    "prompt": "Charlotte of Schaumburg-Lippe noble title",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Logical_Generalization": [
+                {
+                    "prompt": "Who is the daughter/son of Charlotte of Bourbon-Parma?",
+                    "ground_truth": "Charlotte of Schaumburg-Lippe"
+                }
+            ]
+        }
+    }
+]
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:40<00:40, 40.43s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:57<00:00, 26.79s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:57<00:00, 28.84s/it]
+2024-05-07 02:29:55,253 - easyeditor.editors.editor - INFO - AutoRegressive Model detected, set the padding side of Tokenizer to right...
+05/07/2024 02:29:55 - INFO - easyeditor.editors.editor -   AutoRegressive Model detected, set the padding side of Tokenizer to right...
+Traceback (most recent call last):
+  File "/home/hsong/BS/main.py", line 347, in <module>
+    Task.main()
+  File "/home/hsong/BS/main.py", line 300, in main
+    metrics, edited_model = self.do_edit(ret)
+  File "/home/hsong/BS/main.py", line 283, in do_edit
+    editor = BaseEditor.from_hparams(self.hparams)  #take long time 1-2min
+  File "/home/hsong/BS/EasyEdit/easyeditor/editors/editor.py", line 59, in from_hparams
+    return cls(hparams)
+  File "/home/hsong/BS/EasyEdit/easyeditor/editors/editor.py", line 126, in __init__
+    self.model.to(f'cuda:{hparams.device}')
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/transformers/modeling_utils.py", line 2692, in to
+    return super().to(*args, **kwargs)
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1145, in to
+    return self._apply(convert)
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/torch/nn/modules/module.py", line 797, in _apply
+    module._apply(fn)
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/torch/nn/modules/module.py", line 797, in _apply
+    module._apply(fn)
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/torch/nn/modules/module.py", line 797, in _apply
+    module._apply(fn)
+  [Previous line repeated 2 more times]
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/torch/nn/modules/module.py", line 820, in _apply
+    param_applied = fn(param)
+  File "/home/hsong/miniconda3/envs/BS/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1143, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 224.00 MiB (GPU 0; 79.15 GiB total capacity; 22.21 GiB already allocated; 2.19 MiB free; 22.21 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
