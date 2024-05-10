@@ -8,14 +8,22 @@ import logging
 # 禁用 WARN 级别的日志
 logging.disable(logging.WARNING)
 
-model_id = "FlagAlpha/Llama3-Chinese-8B-Instruct"
+default_model_id = "/home/hsong/BS/MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct"
 
 pipeline = transformers.pipeline(
     "text-generation",
-    model=model_id,
+    model=default_model_id,
     model_kwargs={"torch_dtype": torch.float16},
     device="cuda",
 )
+
+model = pipeline.model
+tokenizer = pipeline.tokenizer
+if "_name_or_path" in model.config:
+    model_name = model.config["_name_or_path"]
+else:
+    model_name = default_model_id
+
 terminators = [
         pipeline.tokenizer.eos_token_id,
         pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>")
@@ -160,8 +168,16 @@ if __name__ == '__main__':
             if 'y' in modify_command:
                 passw = int(input("请输入密码："))
                 print("修改中...")
+                
+                # unload模型
+                
+                
+                
+                
+                
+                
                 time.sleep(1)
-                print("修改完成，请再次提问我试试吧。")
+                print("修改成功！是否保存修改？这可能需要些时间。(y/n)：")
             else:
                 print("取消修改")
                 
