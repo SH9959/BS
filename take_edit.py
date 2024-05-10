@@ -47,29 +47,93 @@ if args.debug:
 # 禁用 WARN 级别的日志
 logging.disable(logging.WARNING)
 
-default_model_id = "./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"
-model_save_path = "./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct"
-pipeline = transformers.pipeline(
-    "text-generation",
-    model=default_model_id,
-    model_kwargs={"torch_dtype": torch.float16,"do_sample": False},
-    device="cuda",
-)
+import os
+from transformers import AutoTokenizer, AutoModelForCausalLM
+model_id="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"
+model_save_path="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct"
+class ModelManager:
+    def __init__(self, model_id: str="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc",
+                model_save_path: str="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct"):
+        
+        self.model_id = model_id
+        self.model_save_path = model_save_path
+        
+        self.pipeline = None
+        self.terminators = None
+        self.model = None
+        self.tokenizer = None
+        self.load_method = "pipeline"  # 默认使用 pipeline 方法
+        
+        # 尝试加载模型和分词器
+        self.load_model()
 
-MODEL = pipeline.model
-TOKENIZER = pipeline.tokenizer
+    def load_model(self):
+        if self.model is None:
+            if self.load_method == "from_pretrained":
+                self.model = AutoModelForCausalLM.from_pretrained(self.model_id)
+                self.tokenizer = AutoTokenizer.from_pretrained(self.model_id)
+                
+            elif self.load_method == "pipeline":
+                pipeline = transformers.pipeline(
+                    "text-generation",
+                    model=self.model_id,
+                    model_kwargs={"torch_dtype": torch.float16,"do_sample": False},
+                    device="cuda",
+                )
+                self.pipeline = pipeline
+                self.model = self.pipeline.model
+                self.tokenizer = self.pipeline.tokenizer
+                
+                
+                self.terminators = [
+                    self.pipeline.tokenizer.eos_token_id,
+                    self.pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>")
+                ]
 
-MODEL_NAME = MODEL.config._name_or_path
+    def save_a_model(self,new_model:object):
+        if new_model is not None:
+            new_model.save_pretrained(self.model_save_path)
+            new_tokenizer.save_pretrained(self.model_save_path)
+            print("模型保存成功！")
+        else:
+            print("模型尚未加载，无法保存。")
+            
+    def del_then_reload_model(self):
+        # 从内存中删除原来的模型
+        if self.model is not None:
+            del self.model
+            del self.tokenizer
+            del self.pipeline
+        
+        # 重新加载模型
+        self.load_model()
+    def get_model(self):
+        if self.model is None:
+            self.load_model()
+        return self.model
+    
+    def get_pipeline(self):
+        if self.pipeline is None:
+            self.load_model()
+        return self.pipeline
+    
+    def get_tokenizer(self):
+        if self.tokenizer is None:
+            self.load_model()
+        return self.tokenizer
+    def get_terminators(self):
+        if self.terminators is None:
+            self.load_model()
+        return self.terminators
 
-if MODEL_NAME is not None:
-    print(MODEL_NAME)
-else:
-    MODEL_NAME = default_model_id
+# 使用示例
+model_manager = ModelManager()
 
-terminators = [
-        pipeline.tokenizer.eos_token_id,
-        pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>")
-    ]
+MODEL = model_manager.get_model()
+TOKENIZER = model_manager.get_tokenizer()
+MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
+terminators = model_manager.get_terminators()
+pipeline = model_manager.get_pipeline()
 
 def send(msg:str):
     TMP = "USER>>"
@@ -138,6 +202,18 @@ class MyEditor:
     
 
 def intend_detector(txt:str,pipiline:object=pipeline)->str:
+    
+    global MODEL
+    global TOKENIZER
+    global MODEL_NAME
+    global terminators
+    global pipeline
+    # MODEL = model_manager.get_model()
+    # TOKENIZER = model_manager.get_tokenizer()
+    # MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
+    # terminators = model_manager.get_terminators()
+    # pipeline = model_manager.get_pipeline()
+
     messages = [{"role": "system", "content": ""}]
     task = ("你是一个家庭智能代理，经常和用户交流，"
     "在和用户交谈的过程中，用户可能会希望你修改你的认知，你需要判断用户是否想让你修改你的认知的意图"
@@ -178,7 +254,18 @@ def intend_detector(txt:str,pipiline:object=pipeline)->str:
 
 messages_qa = [{"role": "system", "content": "你是一个家庭智能代理，你名字叫小绿，经常和用户交流"}]
 def chatter(txt:str,pipiline:object=pipeline)->None:
-    global message_qa
+    global messages_qa
+    global MODEL
+    global TOKENIZER
+    global MODEL_NAME
+    global terminators
+    global pipeline
+    # MODEL = model_manager.get_model()
+    # TOKENIZER = model_manager.get_tokenizer()
+    # MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
+    # terminators = model_manager.get_terminators()
+    # pipeline = model_manager.get_pipeline()
+    
     messages_qa.append(
                     {"role": "user", "content": txt}
                 )
@@ -202,6 +289,18 @@ def chatter(txt:str,pipiline:object=pipeline)->None:
     print("\033[33mAgent Chat<<\033[0m",content)  # Llama3-Chinese-8B-Instruct
     return content
 def RE(txt:str,pipiline:object=pipeline)->None:
+    
+    global MODEL
+    global TOKENIZER
+    global MODEL_NAME
+    global terminators
+    global pipeline
+    # MODEL = model_manager.get_model()
+    # TOKENIZER = model_manager.get_tokenizer()
+    # MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
+    # terminators = model_manager.get_terminators()
+    # pipeline = model_manager.get_pipeline()
+    
     def match_list_pattern(inp):
         # 使用正则表达式匹配列表字符串
         pattern = r"\['([^']*)',\s*'([^']*)',\s*'([^']*)'\]"
@@ -251,120 +350,167 @@ def check_legality(txt:str)->bool:
 
 
 async def handle_client(reader, writer):
-    def send_msg(message):
-        writer.write(message.encode())
-        await writer.drain()
-        
-    def reveive_msg():
-        message = []
-        while True:
-            data = await reader.read(1024)
-            message += data.decode().strip()
-            if not message:
-                print("No message received from client.")
-                break
-            print(f"Received message from client: {message}")
-            # 在这里添加逻辑来处理客户端发送的消息，然后构造响应
-            # 这里只是一个示例，可以根据需要进行修改
-        
+    global MODEL
+    global TOKENIZER
+    global MODEL_NAME
+    global terminators
+    global pipeline
+    # MODEL = model_manager.get_model()
+    # TOKENIZER = model_manager.get_tokenizer()
+    # MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
+    # terminators = model_manager.get_terminators()
+    # pipeline = model_manager.get_pipeline()
+    
+    
     client_address = writer.get_extra_info('peername')
     print(f'Connected to client at {client_address[0]}:{client_address[1]}')
+    # try:
+    #     message = "helloaaaaaaaaaaaaaaaa"
+    #     writer.write(message.encode())
+    #     await writer.drain()
+    # except Exception as e:
+    #     print(f"Error sending message to client:\033[32m{e}\033[0m")
+        
+    global messages_qa
+    async def send_msg(message):
+        writer.write(message.encode())
+        await writer.drain()
 
-    while True:
-        try:
-            data = await reader.read(1024)
-            message = data.decode().strip()
-            if not message:
-                print("No message received from client.")
-                break
+    async def receive_msg():
+
+        data = await reader.read(1024)
+        message = data.decode().strip()
+        if not message:
+            print("No message received from client.")
+        else:
             print(f"Received message from client: {message}")
-            # 在这里添加逻辑来处理客户端发送的消息，然后构造响应
-            # 这里只是一个示例，可以根据需要进行修改
+        return message
+        
+    while True:
+        message = await receive_msg()
+        all_response = ""
+        
+        inp = message
+        if 'clean' in inp.lower():
+            messages_qa = [{"role": "system", "content": "你是一个家庭智能代理，你名字叫小绿，经常和用户交流"}]
+            await send_msg("后端已清空对话")
+            continue
+        yes_or_no = intend_detector(txt=inp)
+        messages_qa.append(
+                    {"role": "user", "content": inp}
+                )
+        messages_qa.append(
+                    {"role": "system", "content": yes_or_no}
+                )
+        resp = chatter(txt=inp)
+        all_response += resp+ " "
+        #print("DEBUG send_msg")
+        if '有' in yes_or_no:
 
-            inp = message
-            if 'clean' in inp.lower():
-                messages_qa = [{"role": "system", "content": "你是一个家庭智能代理，你名字叫小绿，经常和用户交流"}]
-                response="已清空对话"
+            print()
+            # TODO
+            sro = RE(txt=inp)
+            try:
+                sro = eval(sro)
+            except ValueError as e:
+                # print("后台解析错误，请重试")
                 continue
-            yes_or_no = intend_detector(txt=inp)
-            messages_qa.append(
-                        {"role": "user", "content": inp}
-                    )
-            messages_qa.append(
-                        {"role": "system", "content": yes_or_no}
-                    )
-            if '有' in yes_or_no:
-                response = chatter(txt=inp)
-                sendsend_msg(response)
-                print()
-                # TODO
-                sro = RE(txt=inp)
-                try:
-                    sro = eval(sro)
-                except ValueError as e:
-                    # print("后台解析错误，请重试")
-                    continue
-                send_msg(f"您似乎有修改意图{sro[0]}{sro[1]}==>{sro2}，确定修改吗？过程不可逆(y/n):")
-                
-                
-                modify_command = receive()
-                
-                
-                
-                if 'y' in modify_command.lower():
-                    if isinstance(sro,str):
-                        try:
-                            sro = eval(sro)
-                        except ValueError as e:
-                            print("后台解析错误，请重试")
-                            continue
-                    send("请输入密码：")
-                    passw = receive()
-                    if(VERIFY(passw)):
-                        print(f"正在修改:{sro[0] + sro[1]} ===> {sro[2]}")
-                        editor = MyEditor(editing_method=method, model_name='Llama3-Chinese-8B-Instruct')
-                        prompt = sro[0] + sro[1]
-                        ground_truth = [None]
-                        target_new = sro[2]
-                        remember_loc = {
-                            "loc": prompt,
-                            "loc_ans": target_new
-                        }
-                        request = construct_input_data(sro, prompt, ground_truth, target_new)  # 构造输入数据
-                        metrics, edited_model = editor.do_edit(request)
-                        send("修改成功！是否保存修改？这可能需要些时间。(y/n)：")
-                        save_cmd = receive()
-                        if 'y' in save_cmd.lower():
-                            send("正在保存新模型...")
-                            edited_model.save_pretrained(model_save_path)
-                            TOKENIZER.save_pretrained(model_save_path)
-                            add_new_prompt_and_targetnew_to_loc_file(new_data=remember_loc)  # 记录修改的内容
-                            send("保存成功! 请重新导入模型后再尝试向我提问吧")
-                            time.sleep(1)
-                        else:
-                            send("取消修改")
-                    else:
-                        send("密码错误")
+            print(f"您似乎有修改意图{sro[0]}{sro[1]}==>{sro[2]}，确定修改吗？过程不可逆(y/n):")
+            resp = f"您似乎有修改意图{sro[0]}{sro[1]}==>{sro[2]}，确定修改吗？过程不可逆(y/n):"
+            all_response += resp+ " "
+            modify_command = await receive_msg()
+            
+            if 'y' in modify_command.lower():
+                if isinstance(sro,str):
+                    try:
+                        sro = eval(sro)
+                    except ValueError as e:
+                        await send_msg("后端解析错误，请重试")
                         continue
-            else:
-                chatter(txt=inp)
-            
-            
-            
-            
-            response = "Hello from server!"
-            writer.write(response.encode())
-            
-            await writer.drain()
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            break
+                print("请输入密码：")
+                await send_msg("请输入密码：")
+                
+                passw = await receive_msg()
+                
+                if(VERIFY(passw)):
+                    print(f"正在修改:{sro[0] + sro[1]} ===> {sro[2]}")
+                    await send_msg(f"正在修改:{sro[0] + sro[1]} ===> {sro[2]}")
+                    editor = MyEditor(editing_method=method, model_name='Llama3-Chinese-8B-Instruct')
+                    prompt = sro[0] + sro[1]
+                    ground_truth = [None]
+                    target_new = sro[2]
+                    remember_loc = {
+                        "loc": prompt,
+                        "loc_ans": target_new
+                    }
+                    request = construct_input_data(sro, prompt, ground_truth, target_new)  # 构造输入数据
+                    metrics, edited_model = editor.do_edit(request)
+                    print("修改成功！是否保存修改？这可能需要些时间。(y/n)：")
+                    await send_msg("修改成功！是否保存修改？这可能需要些时间。(y/n)：")
+                    save_cmd = await receive_msg()
+                    
+                    if 'y' in save_cmd.lower():
+                        await send_msg("正在保存新模型...")
+                        edited_model.save_pretrained(model_save_path)
+                        TOKENIZER.save_pretrained(model_save_path)
+                        add_new_prompt_and_targetnew_to_loc_file(new_data=remember_loc)  # 记录修改的内容
+                        await send_msg("保存成功! 正在重新加载...请稍等几分钟")
+                        time.sleep(1)
+                        
+                        
+                        
+                        # 重新加载模型
+                        print("\033[34m模型加载前\033[0m",id(MODEL))
+                        for name, param in MODEL.named_parameters():
+                            if name == "model.layers.5.mlp.down_proj":
+                                print(f"{name}@@@{param.shape}")
+                                param_before = param.clone()
+                            
+                        model_manager.del_then_reload_model()
+                        
+                        MODEL = model_manager.get_model()
+                        TOKENIZER = model_manager.get_tokenizer()
+                        MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
+                        terminators = model_manager.get_terminators()
+                        pipeline = model_manager.get_pipeline()
+                        
+                        print("\033[34m模型加载后\033[0m",id(MODEL))
+                        for name, param in MODEL.named_parameters():
+                            if name == "model.layers.5.mlp.down_proj":
+                                print(f"{name}@@@{param.shape}")
+                                param_after = param.clone()
+                        
+                        a = check_tensors_same(param_before, param_after)
+                        
+                        print(a)
+                        #os.execv(sys.executable, ['python'] + sys.argv) 
+                        print("重新加载成功，请继续向我提问吧")
+                        await send_msg("重新加载成功,请继续向我提问吧")
+                    else:
+                        await send_msg("已经取消修改")
+                else:
+                    await send_msg("密码错误,请重试")
+                    continue
+        else:
+            pass
+        
 
-    writer.close()
-    await writer.wait_closed()
+        print(f"An error occurred: {e}")
+
+    try:
+        # ... 省略其他代码 ...
+
+        writer.close()
+        # 等待客户端连接关闭
+        await writer.wait_closed()
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 async def main():
-    server_ip = '192.168.1.108'  # 服务器的IP地址
+    
+    ip = os.popen('hostname -I | grep 192.168.1.1').read().strip()
+    print(ip)
+    server_ip = ip #'192.168.1.106'  # 服务器的IP地址
     server_port = 22223  # 服务器的端口号
 
     server = await asyncio.start_server(
@@ -379,7 +525,19 @@ async def main():
 if __name__ == '__main__':
     method = 'FT'
     
-    mode_demo = 'terminal'  # 'server'
+    # global MODEL
+    # global TOKENIZER
+    # global MODEL_NAME
+    # global terminators
+    # global pipeline
+    
+    # MODEL = model_manager.get_model()
+    # TOKENIZER = model_manager.get_tokenizer()
+    # MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
+    # terminators = model_manager.get_terminators()
+    # pipeline = model_manager.get_pipeline()
+    
+    mode_demo = 'server' # 'terminal'  # 'server'
     
     if mode_demo == 'terminal':
         while True:

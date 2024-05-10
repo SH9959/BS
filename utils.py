@@ -1,8 +1,8 @@
 import json
-import math, random, time, argparse
+import math, random, time, argparse, os
 from typing import Tuple, Dict, List, Optional, Union
 from copy import deepcopy
-
+import torch
 
 loc_file_path = "/home/hsong/BS/DATA/loc_qa_100_for_app.json"
 
@@ -58,3 +58,24 @@ def construct_input_data(sro, prompts:Union[List[str],str], origin_response:Opti
 
 
 
+def check_tensors_same(t1:torch.Tensor, t2:torch.Tensor) -> bool:
+    if torch.equal(param_before, param_after):
+        print("两个张量完全相同。")
+        same1 = True
+    else:
+        print("两个张量不完全相同。")
+        same1 = False
+
+    # 检查两个张量是否在一定的误差范围内每个元素都相等
+    # 这个方法更加宽容，允许小的数值差异
+    if torch.allclose(param_before, param_after):
+        print("两个张量在一定的误差范围内每个元素都相等。")
+        same2 = True
+    else:
+        print("两个张量在某些元素上超出了误差范围。")
+        same2 = False
+        
+    return same2
+
+def get_ip():
+    return os.popen('hostname -I').read().strip()
