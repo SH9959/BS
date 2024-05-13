@@ -210,10 +210,10 @@ def get_table_56(json_path:str="") -> None:
     b2 = out_domain_origin_mistral
     b3 = in_domain_origin_gpt
     b4 = in_domain_origin_mistral
-    
+    a = [b1, b2, b3, b4]
     
     a = [a1, a2, a3, a4, a5, a6, a7, a8]
-    a = [b1, b2, b3, b4]
+
 
     for i in a:
         if not os.path.exists(i):

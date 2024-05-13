@@ -51,6 +51,9 @@ import os
 from transformers import AutoTokenizer, AutoModelForCausalLM
 model_id="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"
 model_save_path="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct"
+method = 'ROME'
+
+
 class ModelManager:
     def __init__(self, model_id: str="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc",
                 model_save_path: str="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct"):
@@ -100,11 +103,10 @@ class ModelManager:
             
     def del_then_reload_model(self):
         # 从内存中删除原来的模型
-        if self.model is not None:
-            del self.model
-            del self.tokenizer
-            del self.pipeline
-        
+        self.model = None
+        self.tokenizer = None
+        self.pipeline = None
+        self.terminators = None
         # 重新加载模型
         self.load_model()
     def get_model(self):
@@ -269,20 +271,42 @@ def chatter(txt:str,pipiline:object=pipeline)->None:
     messages_qa.append(
                     {"role": "user", "content": txt}
                 )
-    prompt = pipeline.tokenizer.apply_chat_template(
-            messages_qa, 
-            tokenize=False, 
-            add_generation_prompt=True
+    generate_method = "pipeline"
+    if generate_method == "pipeline":
+
+        prompt = pipeline.tokenizer.apply_chat_template(
+                messages_qa, 
+                tokenize=False, 
+                add_generation_prompt=True
+            )
+        outputs = pipeline(
+            prompt,
+            max_new_tokens=512,
+            eos_token_id=terminators,
+            do_sample=True,
+            temperature=0.6,
+            top_p=0.9
         )
-    outputs = pipeline(
-        prompt,
-        max_new_tokens=512,
-        eos_token_id=terminators,
-        do_sample=True,
-        temperature=0.6,
-        top_p=0.9
-    )
-    content = outputs[0]["generated_text"][len(prompt):]
+        content = outputs[0]["generated_text"][len(prompt):]
+        
+    elif generate_method == "model.generate":
+            # Tokenize the input text
+            # TODO:还没加历史信息
+            
+        
+        inputs = tokenizer(txt, return_tensors="pt", padding=True, truncation=True)
+
+        # Generate response
+        outputs = model.generate(
+            **inputs,
+            max_length=512,
+            do_sample=True,
+            temperature=0.1,
+            top_p=0.9
+        )
+        # Decode the generated response
+        content = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        
     messages_qa.append(
                     {"role": "system", "content": content}
                 )
@@ -355,6 +379,7 @@ async def handle_client(reader, writer):
     global MODEL_NAME
     global terminators
     global pipeline
+    global method
     # MODEL = model_manager.get_model()
     # TOKENIZER = model_manager.get_tokenizer()
     # MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
@@ -373,6 +398,7 @@ async def handle_client(reader, writer):
         
     global messages_qa
     async def send_msg(message):
+        print("\033[0;37;44mSending: ",message,"\033[0m")
         writer.write(message.encode())
         await writer.drain()
 
@@ -380,10 +406,11 @@ async def handle_client(reader, writer):
 
         data = await reader.read(1024)
         message = data.decode().strip()
+        
         if not message:
             print("No message received from client.")
         else:
-            print(f"Received message from client: {message}")
+            print("\033[0;37;44mReceived: ",message,"\033[0m")
         return message
         
     while True:
@@ -406,7 +433,6 @@ async def handle_client(reader, writer):
         all_response += resp+ " "
         #print("DEBUG send_msg")
         if '有' in yes_or_no:
-
             print()
             # TODO
             sro = RE(txt=inp)
@@ -415,9 +441,11 @@ async def handle_client(reader, writer):
             except ValueError as e:
                 # print("后台解析错误，请重试")
                 continue
-            print(f"您似乎有修改意图{sro[0]}{sro[1]}==>{sro[2]}，确定修改吗？过程不可逆(y/n):")
-            resp = f"您似乎有修改意图{sro[0]}{sro[1]}==>{sro[2]}，确定修改吗？过程不可逆(y/n):"
+            print(f"但您似乎有修改意图{sro[0]}{sro[1]}==>{sro[2]}，确定修改吗？过程不可逆(y/n):")
+            resp = f"但您似乎有修改意图{sro[0]}{sro[1]}==>{sro[2]}，确定修改吗？过程不可逆(y/n):"
             all_response += resp+ " "
+            
+            await send_msg(all_response)
             modify_command = await receive_msg()
             
             if 'y' in modify_command.lower():
@@ -433,8 +461,12 @@ async def handle_client(reader, writer):
                 passw = await receive_msg()
                 
                 if(VERIFY(passw)):
-                    print(f"正在修改:{sro[0] + sro[1]} ===> {sro[2]}")
-                    await send_msg(f"正在修改:{sro[0] + sro[1]} ===> {sro[2]}")
+                    print(f"准备修改:{sro[0] + sro[1]} ===> {sro[2]}，输入任意字符继续")
+                    await send_msg(f"准备修改:{sro[0] + sro[1]} ===> {sro[2]}，输入任意字符继续")
+                    print("")
+                    tmp = await receive_msg()
+                    print("receive")
+                    
                     editor = MyEditor(editing_method=method, model_name='Llama3-Chinese-8B-Instruct')
                     prompt = sro[0] + sro[1]
                     ground_truth = [None]
@@ -450,22 +482,34 @@ async def handle_client(reader, writer):
                     save_cmd = await receive_msg()
                     
                     if 'y' in save_cmd.lower():
-                        await send_msg("正在保存新模型...")
+                        await send_msg("准备保存新模型...输入任意字符继续")
+                        tmp = await receive_msg()
+                        print("0/3 保存中...")
                         edited_model.save_pretrained(model_save_path)
+                        print("1/3 保存中...")
                         TOKENIZER.save_pretrained(model_save_path)
+                        print("2/3 保存中...")
                         add_new_prompt_and_targetnew_to_loc_file(new_data=remember_loc)  # 记录修改的内容
-                        await send_msg("保存成功! 正在重新加载...请稍等几分钟")
+                        print("3/3 保存完成")
+                        await send_msg("保存成功! 需要重新加载模型...输入任意字符继续")
                         time.sleep(1)
-                        
-                        
-                        
+                        tmp = await receive_msg()
                         # 重新加载模型
                         print("\033[34m模型加载前\033[0m",id(MODEL))
-                        for name, param in MODEL.named_parameters():
-                            if name == "model.layers.5.mlp.down_proj":
-                                print(f"{name}@@@{param.shape}")
-                                param_before = param.clone()
-                            
+                        print(MODEL.config)
+                        # for name, param in MODEL.named_parameters():
+                        #     print(name)
+                        #     if method == "FT":
+                        #         if name == "model.layers.21.mlp.down_proj.weight":
+                        #             print(f"{name}@@@{param}")
+                        #             param_before = param.clone()
+                        #     elif method == "ROME":
+                        #         if name == "model.layers.5.mlp.down_proj":
+                        #             print(f"{name}@@@{param}")
+                        #             param_before = param.clone()
+                        
+                        # pb = param_before
+                        
                         model_manager.del_then_reload_model()
                         
                         MODEL = model_manager.get_model()
@@ -475,37 +519,48 @@ async def handle_client(reader, writer):
                         pipeline = model_manager.get_pipeline()
                         
                         print("\033[34m模型加载后\033[0m",id(MODEL))
-                        for name, param in MODEL.named_parameters():
-                            if name == "model.layers.5.mlp.down_proj":
-                                print(f"{name}@@@{param.shape}")
-                                param_after = param.clone()
+                        print(MODEL.config)
+                        # for name, param in MODEL.named_parameters():
+                        #     print(name)
+                        #     if method == "FT":
+                        #         if name == "model.layers.21.mlp.down_proj.weight":
+                        #             print(f"{name}@@@{param}")
+                        #             param_after = param.clone()
+                        #     elif method == "ROME":
+                        #         if name == "model.layers.5.mlp.down_proj":
+                        #             print(f"{name}@@@{param}")
+                        #             param_after = param.clone()
+                                    
+                        # pa = param_after
                         
-                        a = check_tensors_same(param_before, param_after)
+                        # a = check_tensors_same(pb, pa)
                         
-                        print(a)
+                        # print(a)
                         #os.execv(sys.executable, ['python'] + sys.argv) 
                         print("重新加载成功，请继续向我提问吧")
                         await send_msg("重新加载成功,请继续向我提问吧")
                     else:
-                        await send_msg("已经取消修改")
+                        
+                        await send_msg("好的，已经取消保存。继续向我提问吧！")
+                        continue
                 else:
                     await send_msg("密码错误,请重试")
                     continue
+            else:
+                await send_msg("好的，已经取消修改。继续向我提问吧！")
+                print("好的，已经取消修改。继续向我提问吧！")
+                continue
         else:
+            await send_msg(all_response)
             pass
         
-
-        print(f"An error occurred: {e}")
-
     try:
         # ... 省略其他代码 ...
-
         writer.close()
         # 等待客户端连接关闭
         await writer.wait_closed()
     except Exception as e:
         print(f"An error occurred: {e}")
-
 async def main():
     
     ip = os.popen('hostname -I | grep 192.168.1.1').read().strip()
@@ -523,7 +578,6 @@ async def main():
         
     
 if __name__ == '__main__':
-    method = 'FT'
     
     # global MODEL
     # global TOKENIZER

@@ -70,6 +70,6 @@ def extend_incident(json_path:str="/home/hsong/BS/DATA/KnowEdit-huggingface/benc
 
 
 if __name__ == "__main__":
-    pick_loc_data(100)
-    # dataset_info(data_path = '/home/hsong/BS/DATA/KnowEdit-huggingface/benchmark/ZsRE/ZsRE-test-all.json')
+    # pick_loc_data(100)
+    dataset_info(data_path = '/home/hsong/BS/DATA/KnowEdit-huggingface/benchmark/ZsRE/ZsRE-test-all.json')
     # extend_incident()

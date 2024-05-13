@@ -59,7 +59,7 @@ def construct_input_data(sro, prompts:Union[List[str],str], origin_response:Opti
 
 
 def check_tensors_same(t1:torch.Tensor, t2:torch.Tensor) -> bool:
-    if torch.equal(param_before, param_after):
+    if torch.equal(t1, t2):
         print("两个张量完全相同。")
         same1 = True
     else:
@@ -68,7 +68,7 @@ def check_tensors_same(t1:torch.Tensor, t2:torch.Tensor) -> bool:
 
     # 检查两个张量是否在一定的误差范围内每个元素都相等
     # 这个方法更加宽容，允许小的数值差异
-    if torch.allclose(param_before, param_after):
+    if torch.allclose(t1, t2):
         print("两个张量在一定的误差范围内每个元素都相等。")
         same2 = True
     else:

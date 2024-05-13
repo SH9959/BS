@@ -16,10 +16,6 @@ async def handle_client(reader, writer):
             # 在这里添加逻辑来处理客户端发送的消息，然后构造响应
             # 这里只是一个示例，可以根据需要进行修改
             
-            
-            
-            
-            
             response = "Hello from server!"
             writer.write(response.encode())
             
