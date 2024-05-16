@@ -50,13 +50,14 @@ logging.disable(logging.WARNING)
 import os
 from transformers import AutoTokenizer, AutoModelForCausalLM
 model_id="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"
-model_save_path="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct"
-method = 'ROME'
+model_save_path="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"
+method = 'FT'
 
+DEBUG = True
 
 class ModelManager:
     def __init__(self, model_id: str="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc",
-                model_save_path: str="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct"):
+                model_save_path: str="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"):
         
         self.model_id = model_id
         self.model_save_path = model_save_path
@@ -92,13 +93,13 @@ class ModelManager:
                     self.pipeline.tokenizer.eos_token_id,
                     self.pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>")
                 ]
-
-    def save_a_model(self,new_model:object):
+    def save_a_model(self, new_model:object):
         if new_model is not None:
             new_model.save_pretrained(self.model_save_path)
             new_tokenizer.save_pretrained(self.model_save_path)
             print("模型保存成功！")
         else:
+            
             print("模型尚未加载，无法保存。")
             
     def del_then_reload_model(self):
@@ -190,11 +191,19 @@ class MyEditor:
         
         self.hparams = self.editing_hparams.from_hparams(self.hparams_dir)
     def do_edit(self, params: Dict)-> Tuple[object, object]:
+        global MODEL
+        global MODEL
+        global TOKENIZER
+        global MODEL_NAME
+        global terminators
+        global pipeline
+        
         editor = BaseEditor(self.hparams, MODEL, TOKENIZER, MODEL_NAME)  #take long time 1-2min
         
         # if self.args_dict["Editing Method"] in ['MEMIT', 'PMET']:
         #     metrics, edited_model, _ = editor.batch_edit(**params)
         if self.editing_method in ['KN', 'ROME','FT','LoRA','MEMIT', 'PMET']:
+            params.update({"keep_original_weight": False})
             metrics, edited_model, _ = editor.edit(**params)
         else:
             raise ValueError(f"Unsupported Editing Method: {self.args_dict['Editing Method']}")
@@ -284,7 +293,7 @@ def chatter(txt:str,pipiline:object=pipeline)->None:
             max_new_tokens=512,
             eos_token_id=terminators,
             do_sample=True,
-            temperature=0.6,
+            temperature=0.1,
             top_p=0.9
         )
         content = outputs[0]["generated_text"][len(prompt):]
@@ -357,17 +366,21 @@ def RE(txt:str,pipiline:object=pipeline)->None:
         max_new_tokens=512,
         eos_token_id=terminators,
         do_sample=True,
-        temperature=0.6,
+        temperature=0.1,
         top_p=0.9
     )
     content = outputs[0]["generated_text"][len(prompt):]
+    print(content)
     #TODO content一定要是主语关系宾语时才向用户展现
     sro = match_list_pattern(content)
+    if sro is None:
+        sro = [" "," "," "]
     print("\033[33mAgent RE<<\033[0m",sro)  # Llama3-Chinese-8B-Instruct
     return content
-def VERIFY(password):
-    
-    return True
+def VERIFY(password:str):
+    if "123" in password:
+        return True
+    return False
 def check_legality(txt:str)->bool:
     # TODO
     return True
@@ -380,6 +393,24 @@ async def handle_client(reader, writer):
     global terminators
     global pipeline
     global method
+    global DEBUG
+
+
+    if DEBUG:
+        print("================================================================")
+        print(f"\033[34mid {id(MODEL)}\033[0m")
+        for name, param in MODEL.named_parameters():
+            # print(name)
+            if method == "FT":
+                if name == "model.layers.21.mlp.down_proj.weight":
+                    print(f"{name}@@@{param}")
+                    param_before1 = param.clone()
+            elif method == "ROME":
+                if name == "model.layers.5.mlp.down_proj.weight":
+                    print(f"{name}@@@{param}")
+                    param_before1 = param.clone()
+        print("===============================================================")
+        
     # MODEL = model_manager.get_model()
     # TOKENIZER = model_manager.get_tokenizer()
     # MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
@@ -416,8 +447,23 @@ async def handle_client(reader, writer):
     while True:
         message = await receive_msg()
         all_response = ""
-        
+
+                            
         inp = message
+        if DEBUG:
+            if "p" in inp.lower():
+                print("="*40)
+                print(f"\033[34mid {id(MODEL)}\033[0m")
+                for name, param in MODEL.named_parameters():
+                    # print(name)
+                    if method == "FT":
+                        if name == "model.layers.21.mlp.down_proj.weight":
+                            print(f"{name}@@@{param}")
+                            param_before = param.clone()
+                    elif method == "ROME":
+                        if name == "model.layers.5.mlp.down_proj.weight":
+                            print(f"{name}@@@{param}")
+                            param_before = param.clone()
         if 'clean' in inp.lower():
             messages_qa = [{"role": "system", "content": "你是一个家庭智能代理，你名字叫小绿，经常和用户交流"}]
             await send_msg("后端已清空对话")
@@ -441,8 +487,13 @@ async def handle_client(reader, writer):
             except ValueError as e:
                 # print("后台解析错误，请重试")
                 continue
-            print(f"但您似乎有修改意图{sro[0]}{sro[1]}==>{sro[2]}，确定修改吗？过程不可逆(y/n):")
-            resp = f"但您似乎有修改意图{sro[0]}{sro[1]}==>{sro[2]}，确定修改吗？过程不可逆(y/n):"
+
+            try:
+                print(f"但您似乎有修改意图{sro[0]}{sro[1]}==>{sro[2]}，确定修改吗？过程不可逆(y/n):")
+                resp = f"但您似乎有修改意图：{sro[0]}{sro[1]}==>{sro[2]}，确定修改吗？过程不可逆(y/n):"
+            except Exception as e:
+                print("后台格式解析错误")
+                
             all_response += resp+ " "
             
             await send_msg(all_response)
@@ -477,6 +528,32 @@ async def handle_client(reader, writer):
                     }
                     request = construct_input_data(sro, prompt, ground_truth, target_new)  # 构造输入数据
                     metrics, edited_model = editor.do_edit(request)
+                    
+                    if DEBUG:
+                        print("="*40)
+                        print(f"\033[34mid {id(edited_model)}\033[0m")
+                        for name, param in edited_model.named_parameters():
+                            # print(name)
+                            if method == "FT":
+                                if name == "model.layers.21.mlp.down_proj.weight":
+                                    print(f"{name}@@@{param}")
+                                    param_after1 = param.clone()
+                            elif method == "ROME":
+                                if name == "model.layers.5.mlp.down_proj.weight":
+                                    print(f"{name}@@@{param}")
+                                    param_after1 = param.clone()
+                                    
+                    
+                        a = check_tensors_same(param_before1, param_after1)
+                        print(a)
+                        print("="*40)
+                    
+                    
+                    
+                    
+                    
+                    
+                                    
                     print("修改成功！是否保存修改？这可能需要些时间。(y/n)：")
                     await send_msg("修改成功！是否保存修改？这可能需要些时间。(y/n)：")
                     save_cmd = await receive_msg()
@@ -490,61 +567,66 @@ async def handle_client(reader, writer):
                         TOKENIZER.save_pretrained(model_save_path)
                         print("2/3 保存中...")
                         add_new_prompt_and_targetnew_to_loc_file(new_data=remember_loc)  # 记录修改的内容
+                        MODEL = edited_model
                         print("3/3 保存完成")
-                        await send_msg("保存成功! 需要重新加载模型...输入任意字符继续")
-                        time.sleep(1)
-                        tmp = await receive_msg()
-                        # 重新加载模型
-                        print("\033[34m模型加载前\033[0m",id(MODEL))
-                        print(MODEL.config)
-                        # for name, param in MODEL.named_parameters():
-                        #     print(name)
-                        #     if method == "FT":
-                        #         if name == "model.layers.21.mlp.down_proj.weight":
-                        #             print(f"{name}@@@{param}")
-                        #             param_before = param.clone()
-                        #     elif method == "ROME":
-                        #         if name == "model.layers.5.mlp.down_proj":
-                        #             print(f"{name}@@@{param}")
-                        #             param_before = param.clone()
+                        await send_msg("保存成功! 请继续向我提问吧")
+                        # time.sleep(1)
+                        # tmp = await receive_msg()
+                        # # 重新加载模型
+                        # print("\033[34m模型加载前\033[0m",id(MODEL))
+                        # print(MODEL.config)
+                        # if DEBUG:
+                        #     print("="*40)
+                        #     print(f"\033[34mid {id(edited_model)}\033[0m")
+                        #     for name, param in MODEL.named_parameters():
+                        #         # print(name)
+                        #         if method == "FT":
+                        #             if name == "model.layers.21.mlp.down_proj.weight":
+                        #                 print(f"{name}@@@{param}")
+                        #                 param_before = param.clone()
+                        #         elif method == "ROME":
+                        #             if name == "model.layers.5.mlp.down_proj.weight":
+                        #                 print(f"{name}@@@{param}")
+                        #                 param_before = param.clone()
+                            
+                        #     pb = param_before
+                        #     print("="*40)
+                        # model_manager.del_then_reload_model()
+                        # print(f"\033[34m 原始模型已清空，并加载了新模型")
+                        # MODEL = model_manager.get_model()
+                        # TOKENIZER = model_manager.get_tokenizer()
+                        # MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
+                        # terminators = model_manager.get_terminators()
+                        # pipeline = model_manager.get_pipeline()
                         
-                        # pb = param_before
-                        
-                        model_manager.del_then_reload_model()
-                        
-                        MODEL = model_manager.get_model()
-                        TOKENIZER = model_manager.get_tokenizer()
-                        MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
-                        terminators = model_manager.get_terminators()
-                        pipeline = model_manager.get_pipeline()
-                        
-                        print("\033[34m模型加载后\033[0m",id(MODEL))
-                        print(MODEL.config)
-                        # for name, param in MODEL.named_parameters():
-                        #     print(name)
-                        #     if method == "FT":
-                        #         if name == "model.layers.21.mlp.down_proj.weight":
-                        #             print(f"{name}@@@{param}")
-                        #             param_after = param.clone()
-                        #     elif method == "ROME":
-                        #         if name == "model.layers.5.mlp.down_proj":
-                        #             print(f"{name}@@@{param}")
-                        #             param_after = param.clone()
-                                    
-                        # pa = param_after
-                        
-                        # a = check_tensors_same(pb, pa)
-                        
-                        # print(a)
-                        #os.execv(sys.executable, ['python'] + sys.argv) 
-                        print("重新加载成功，请继续向我提问吧")
-                        await send_msg("重新加载成功,请继续向我提问吧")
+                        # print("\033[34m模型加载后\033[0m",id(MODEL))
+                        # print(MODEL.config)
+                        # if DEBUG:
+                        #     for name, param in MODEL.named_parameters():
+                        #         # print(name)
+                        #         if method == "FT":
+                        #             if name == "model.layers.21.mlp.down_proj.weight":
+                        #                 print(f"{name}@@@{param}")
+                        #                 param_after = param.clone()
+                        #         elif method == "ROME":
+                        #             if name == "model.layers.5.mlp.down_proj.weight":
+                        #                 print(f"{name}@@@{param}")
+                        #                 param_after = param.clone()
+                                        
+                        #     pa = param_after
+                            
+                        #     a = check_tensors_same(pb, pa)
+                            
+                        #     print(a)
+                        # #os.execv(sys.executable, ['python'] + sys.argv) 
+                        # print("重新加载成功，请继续向我提问吧")
+                        # await send_msg("重新加载成功,请继续向我提问吧")
                     else:
                         
                         await send_msg("好的，已经取消保存。继续向我提问吧！")
                         continue
                 else:
-                    await send_msg("密码错误,请重试")
+                    await send_msg("密码错误,请重新向我提问吧")
                     continue
             else:
                 await send_msg("好的，已经取消修改。继续向我提问吧！")
@@ -576,6 +658,227 @@ async def main():
     async with server:
         await server.serve_forever()
         
+        
+def run_as_terminal():
+    
+    global messages_qa
+    
+    global MODEL
+    global TOKENIZER
+    global MODEL_NAME
+    global terminators
+    global pipeline
+    global method
+    global DEBUG
+    
+    if DEBUG:
+        print("================================================================")
+        print(f"\033[34mid {id(MODEL)}\033[0m")
+        for name, param in MODEL.named_parameters():
+            # print(name)
+            if method == "FT":
+                if name == "model.layers.21.mlp.down_proj.weight":
+                    print(f"{name}@@@{param}")
+                    param_before1 = param.clone()
+            elif method == "ROME":
+                if name == "model.layers.5.mlp.down_proj.weight":
+                    print(f"{name}@@@{param}")
+                    param_before1 = param.clone()
+        print("===============================================================")
+        
+    while True:
+        message = receive()
+        all_response = ""
+        
+        inp = message
+        if DEBUG:
+            if "p" in inp.lower():
+                print("="*40)
+                print(f"\033[34mid {id(MODEL)}\033[0m")
+                for name, param in MODEL.named_parameters():
+                    # print(name)
+                    if method == "FT":
+                        if name == "model.layers.21.mlp.down_proj.weight":
+                            print(f"{name}@@@{param}")
+                            param_before = param.clone()
+                    elif method == "ROME":
+                        if name == "model.layers.5.mlp.down_proj.weight":
+                            print(f"{name}@@@{param}")
+                            param_before = param.clone()
+                            
+        if 'clean' in inp.lower():
+            messages_qa = [{"role": "system", "content": "你是一个家庭智能代理，你名字叫小绿，经常和用户交流"}]
+            send("后端已清空对话")
+            continue
+        yes_or_no = intend_detector(txt=inp)
+        messages_qa.append(
+                    {"role": "user", "content": inp}
+                )
+        messages_qa.append(
+                    {"role": "system", "content": yes_or_no}
+                )
+        resp = chatter(txt=inp)
+        all_response += resp+ " "
+        #print("DEBUG send_msg")
+        if '有' in yes_or_no:
+            # TODO
+            sro = RE(txt=inp)
+            try:
+                sro = eval(sro)
+            except ValueError as e:
+                # print("后台解析错误，请重试")
+                continue
+            print(sro)
+            #print(f"但您似乎有修改意图{sro[0]}{sro[1]}==>{sro[2]}，确定修改吗？过程不可逆(y/n):")
+            try:
+                resp = f"但您似乎有修改意图：{sro[0]}{sro[1]}==>{sro[2]}，确定修改吗？过程不可逆(y/n):"
+            except Exception as e:
+                print("后台格式解析错误")
+            all_response += resp+ " "
+            
+            send(all_response)
+            modify_command = receive()
+            
+            if 'y' in modify_command.lower():
+                if isinstance(sro,str):
+                    try:
+                        sro = eval(sro)
+                    except ValueError as e:
+                        send("后端解析错误，请重试")
+                        continue
+                #print("请输入密码：")
+                send("请输入密码：")
+                
+                passw = receive()
+                
+                if(VERIFY(passw)):
+                    #print(f"准备修改:{sro[0] + sro[1]} ===> {sro[2]}，输入任意字符继续")
+                    send(f"准备修改:{sro[0] + sro[1]} ===> {sro[2]}，输入任意字符继续")
+                    print("")
+                    tmp = receive()
+                    print("receive")
+                    
+                    editor = MyEditor(editing_method=method, model_name='Llama3-Chinese-8B-Instruct')
+                    prompt = sro[0] + sro[1]
+                    ground_truth = [None]
+                    target_new = sro[2]
+                    remember_loc = {
+                        "loc": prompt,
+                        "loc_ans": target_new
+                    }
+                    request = construct_input_data(sro, prompt, ground_truth, target_new)  # 构造输入数据
+                    metrics, edited_model = editor.do_edit(request)
+                    
+                    if DEBUG:
+                        print("="*40)
+                        print(f"\033[34mid {id(edited_model)}\033[0m")
+                        for name, param in edited_model.named_parameters():
+                            # print(name)
+                            if method == "FT":
+                                if name == "model.layers.21.mlp.down_proj.weight":
+                                    print(f"{name}@@@{param}")
+                                    param_after1 = param.clone()
+                            elif method == "ROME":
+                                if name == "model.layers.5.mlp.down_proj.weight":
+                                    print(f"{name}@@@{param}")
+                                    param_after1 = param.clone()
+                                    
+                    
+                        a = check_tensors_same(param_before1, param_after1)
+                        print(a)
+                        print("="*40)
+                    
+                    
+                    
+                    
+                    
+                    
+                                    
+                    # print("修改成功！是否保存修改？这可能需要些时间。(y/n)：")
+                    send("修改成功！是否保存修改？这可能需要些时间。(y/n)：")
+                    save_cmd = receive()
+                    
+                    if 'y' in save_cmd.lower():
+                        send("准备保存新模型...输入任意字符继续")
+                        tmp = receive()
+                        print("0/3 保存中...")
+                        edited_model.save_pretrained(model_save_path)
+                        print("1/3 保存中...")
+                        TOKENIZER.save_pretrained(model_save_path)
+                        print("2/3 保存中...")
+                        add_new_prompt_and_targetnew_to_loc_file(new_data=remember_loc)  # 记录修改的内容
+                        print("3/3 保存完成")
+                        MODEL = edited_model
+                        send("保存成功! 请继续向我提问吧")
+                        
+                        
+                        # 模型已经加载成功，无需再次加载
+                        
+                        # time.sleep(1)
+                        # tmp = receive()
+                        # # 重新加载模型
+                        # print("\033[34m模型加载前\033[0m",id(MODEL))
+                        # print(MODEL.config)
+                        # if DEBUG:
+                        #     print("="*40)
+                        #     print(f"\033[34mid {id(edited_model)}\033[0m")
+                        #     for name, param in MODEL.named_parameters():
+                        #         # print(name)
+                        #         if method == "FT":
+                        #             if name == "model.layers.21.mlp.down_proj.weight":
+                        #                 print(f"{name}@@@{param}")
+                        #                 param_before = param.clone()
+                        #         elif method == "ROME":
+                        #             if name == "model.layers.5.mlp.down_proj.weight":
+                        #                 print(f"{name}@@@{param}")
+                        #                 param_before = param.clone()
+                            
+                        #     pb = param_before
+                        #     print("="*40)
+                        # model_manager.del_then_reload_model()
+                        # print(f"\033[34m 原始模型已清空，并加载了新模型")
+                        # MODEL = model_manager.get_model()
+                        # TOKENIZER = model_manager.get_tokenizer()
+                        # MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
+                        # terminators = model_manager.get_terminators()
+                        # pipeline = model_manager.get_pipeline()
+                        
+                        # print("\033[34m模型加载后\033[0m",id(MODEL))
+                        # print(MODEL.config)
+                        # if DEBUG:
+                        #     for name, param in MODEL.named_parameters():
+                        #         # print(name)
+                        #         if method == "FT":
+                        #             if name == "model.layers.21.mlp.down_proj.weight":
+                        #                 print(f"{name}@@@{param}")
+                        #                 param_after = param.clone()
+                        #         elif method == "ROME":
+                        #             if name == "model.layers.5.mlp.down_proj.weight":
+                        #                 print(f"{name}@@@{param}")
+                        #                 param_after = param.clone()
+                                        
+                        #     pa = param_after
+                            
+                        #     a = check_tensors_same(pb, pa)
+                            
+                        #     print(a)
+                        # #os.execv(sys.executable, ['python'] + sys.argv) 
+                        # #print("重新加载成功，请继续向我提问吧")
+                        # send("重新加载成功,请继续向我提问吧")
+                    else:
+                        
+                        send("好的，已经取消保存。继续向我提问吧！")
+                        continue
+                else:
+                    send("密码错误,请重新向我提问吧")
+                    continue
+            else:
+                send("好的，已经取消修改。继续向我提问吧！")
+                #print("好的，已经取消修改。继续向我提问吧！")
+                continue
+        else:
+            send(all_response)
+            pass
     
 if __name__ == '__main__':
     
@@ -590,71 +893,25 @@ if __name__ == '__main__':
     # MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
     # terminators = model_manager.get_terminators()
     # pipeline = model_manager.get_pipeline()
+    mode_demo = 'terminal'
     
-    mode_demo = 'server' # 'terminal'  # 'server'
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--debug', action='store_true', help='debug mode')
+    args, _ = parser.parse_known_args()
+    
+    if args.debug:
+        # if you use vscode on hpc-login-01
+        import debugpy
+        
+        debugpy.connect(('192.168.1.50', 6789))
+        debugpy.wait_for_client()
+        debugpy.breakpoint()
+    
+        mode_demo == 'terminal'
+    
+    # 'terminal'  # 'server'
     
     if mode_demo == 'terminal':
-        while True:
-            inp = receive()
-            if 'clean' in inp.lower():
-                messages_qa = [{"role": "system", "content": "你是一个家庭智能代理，你名字叫小绿，经常和用户交流"}]
-                print("已清空对话")
-                continue
-            yes_or_no = intend_detector(txt=inp)
-            messages_qa.append(
-                        {"role": "user", "content": inp}
-                    )
-            messages_qa.append(
-                        {"role": "system", "content": yes_or_no}
-                    )
-            if '有' in yes_or_no:
-                chatter(txt=inp)
-                print()
-                # TODO
-                sro = RE(txt=inp)
-                try:
-                    sro = eval(sro)
-                except ValueError as e:
-                    # print("后台解析错误，请重试")
-                    continue
-                send(f"您似乎有修改意图{sro}，确定修改吗？过程不可逆(y/n):")
-                modify_command = receive()
-                if 'y' in modify_command.lower():
-                    if isinstance(sro,str):
-                        try:
-                            sro = eval(sro)
-                        except ValueError as e:
-                            print("后台解析错误，请重试")
-                            continue
-                    send("请输入密码：")
-                    passw = receive()
-                    if(VERIFY(passw)):
-                        print(f"正在修改:{sro[0] + sro[1]} ===> {sro[2]}")
-                        editor = MyEditor(editing_method=method, model_name='Llama3-Chinese-8B-Instruct')
-                        prompt = sro[0] + sro[1]
-                        ground_truth = [None]
-                        target_new = sro[2]
-                        remember_loc = {
-                            "loc": prompt,
-                            "loc_ans": target_new
-                        }
-                        request = construct_input_data(sro, prompt, ground_truth, target_new)  # 构造输入数据
-                        metrics, edited_model = editor.do_edit(request)
-                        send("修改成功！是否保存修改？这可能需要些时间。(y/n)：")
-                        save_cmd = receive()
-                        if 'y' in save_cmd.lower():
-                            send("正在保存新模型...")
-                            edited_model.save_pretrained(model_save_path)
-                            TOKENIZER.save_pretrained(model_save_path)
-                            add_new_prompt_and_targetnew_to_loc_file(new_data=remember_loc)  # 记录修改的内容
-                            send("保存成功! 请重新导入模型后再尝试向我提问吧")
-                            time.sleep(1)
-                        else:
-                            send("取消修改")
-                    else:
-                        send("密码错误")
-                        continue
-            else:
-                chatter(txt=inp)
+        run_as_terminal()
     elif mode_demo == 'server':
         asyncio.run(main())

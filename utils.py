@@ -55,9 +55,6 @@ def construct_input_data(sro, prompts:Union[List[str],str], origin_response:Opti
     }
     
     return ret
-
-
-
 def check_tensors_same(t1:torch.Tensor, t2:torch.Tensor) -> bool:
     if torch.equal(t1, t2):
         print("两个张量完全相同。")
