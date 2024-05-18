@@ -36,12 +36,16 @@ class myNetHook:
         
         if isinstance(model, transformers.models.llama.modeling_llama.LlamaForCausalLM):
             self.n_layers = model.config.num_hidden_layers
+        elif isinstance(model, transformers.models.mistral.modeling_mistral.MistralForCausalLM):
+            self.n_layers = model.config.num_hidden_layers
             
         self.all_layer_outputs = {layer: {} for layer in range(self.n_layers)}
 
     def __enter__(self):
         if isinstance(self.model, transformers.models.llama.modeling_llama.LlamaForCausalLM):
             decoder = transformers.models.llama.modeling_llama.LlamaDecoderLayer
+        elif isinstance(self.model, transformers.models.mistral.modeling_mistral.MistralForCausalLM):
+            decoder = transformers.models.mistral.modeling_mistral.MistralDecoderLayer
         def module_hook(module, inputs, output, layer_index):
             if isinstance(module, decoder):
                 # print(f'layer {layer_index} output: {output}')
@@ -75,6 +79,8 @@ class myRankLen:
         self.n_layers = None
         
         if isinstance(model, transformers.models.llama.modeling_llama.LlamaForCausalLM):
+            self.n_layers = model.config.num_hidden_layers
+        elif isinstance(model, transformers.models.mistral.modeling_mistral.MistralForCausalLM):
             self.n_layers = model.config.num_hidden_layers
             
         self.output = {layer: {} for layer in range(self.n_layers)}
@@ -187,11 +193,34 @@ def get_info(model, tokenizer, prompt, tgt, layer_hook):
     print(out)
     return out
     
-def caculate_layer_to_modify(rank_list):
-    pass
+def calculate_layer_to_modify(rank_list):
+    max_count = 0
+    max_layer = 5
+    
+    # 初始化 word_in_every_layer 字典
+    word_in_every_layer = {}
+    for layer, v in rank_list.items():
+        for kk, vv in v['info'].items():
+            if vv['maxpro_tok'] not in word_in_every_layer:
+                word_in_every_layer[vv['maxpro_tok']] = {"count": 0, "layer": layer}
+            word_in_every_layer[vv['maxpro_tok']]['count'] += 1
+        
+        # 更新最大 count 和对应的层
+        
+    for k, v in word_in_every_layer.items():
+        if v['count'] > max_count:
+            max_count = v['count']
+            max_layer = v['layer']
+    
+    # 如果所有层的 count 相同，返回 5
+    if max_count == 1:
+        return 5
+    else:
+        return max_layer
+        
 
 
-def show_info_in_gragh(rank_list:Dict, one_tgt:str, prompt:str):
+def show_info_in_gragh(rank_list:Dict, one_tgt:str, prompt:str,model_name:str="LlaMA3"):
     x=[]
     y_rank = []
     y_prob = []
@@ -232,11 +261,11 @@ def show_info_in_gragh(rank_list:Dict, one_tgt:str, prompt:str):
     ax2.tick_params('y')
 
     # 设置图表标题
-    plt.title(f'‘{prompt}’ 在LlaMA3中各层的计算情况')
+    plt.title(f'‘{prompt}’ 在{model_name}中各层的计算情况')
     ax2.legend(loc='upper left')
 
     # 保存图表为PNG文件
-    plt.savefig(f'_{one_tgt}_.png')
+    plt.savefig(f'pngs/17/_{one_tgt}_.png')
         
 
 
@@ -259,10 +288,12 @@ if __name__ == "__main__":
     print(torch.cuda.memory_allocated())    
     model_id="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"
     model_save_path="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"
+    model_id="mistralai/Mistral-7B-v0.1"
+    model_save_path="./MODELS/Mistral-7B-v0.1"
     method = 'FT'
 
     DEBUG = True
-    model_manager = ModelManager()
+    model_manager = ModelManager(model_id=model_id,model_save_path=model_save_path)
     print(torch.cuda.memory_allocated())
     
     MODEL = model_manager.get_model()
@@ -281,11 +312,7 @@ if __name__ == "__main__":
     
     
     
-    subject = "爱因斯坦"
-    r = "的专业是"
-    txt = subject + r
-    origin_out = "物理"
-    target = "医学"
+
     
     subject = "Einstein"
     r = "’s field of expertise is"
@@ -293,7 +320,11 @@ if __name__ == "__main__":
     origin_out = "physics"
     target = "medicine"
     
-
+    subject = "爱因斯坦"
+    r = "的专业是"
+    txt = subject + r
+    origin_out = "物理"
+    target = "医学"
     
     targets = [origin_out, target]
     
@@ -308,8 +339,8 @@ if __name__ == "__main__":
                     'rank':[1, 2, 3],
                     'prob':[tensor(0.1), tensor(0.2), tensor(0.3)],
                     'delt':[tensor(0.1), tensor(0.2), tensor(0.3)],
-                    'maxpro':[0.1, 0.2, 0.3],
-                    'maxpro_tok':['物理', '数学', '化学']
+                    'maxpro':0.2,
+                    'maxpro_tok':'物理'
                 }
 
             }
@@ -321,12 +352,19 @@ if __name__ == "__main__":
     wri = rank_list
     wri = utils.to_list(wri)
     
-    with open(f"{target}_info.json", 'w', encoding='utf-8') as f:
-        json.dump(rank_list, f, ensure_ascii=False, indent=4)
+    word = origin_out
+    SAVE=False
+    if SAVE:
+        with open(f"jsons/17/{word}_info.json", 'w', encoding='utf-8') as f:
+            json.dump(rank_list, f, ensure_ascii=False, indent=4)
+            
+        show_info_in_gragh(rank_list, one_tgt=word, prompt=txt)
         
-    show_info_in_gragh(rank_list, one_tgt=origin_out, prompt=txt)
+    layer_ind = calculate_layer_to_modify(rank_list)
+    print(layer_ind)
+    input("layer")
     
-    layer_ind = caculate_layer_to_modify(rank_list)
+    
     
     rl = {k:v['info'] for k, v in rank_list.items() if "info" in v}
     print(rl)

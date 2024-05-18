@@ -51,7 +51,7 @@ import os
 from transformers import AutoTokenizer, AutoModelForCausalLM
 model_id="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"
 model_save_path="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"
-method = 'FT'
+method = 'ROME'
 
 
 MODEL = None
@@ -64,8 +64,11 @@ pipeline = None
 DEBUG = True
 
 class ModelManager:
-    def __init__(self, model_id: str="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc",
-                model_save_path: str="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"):
+    def __init__(
+        self, 
+        model_id: str="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc",
+        model_save_path: str="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"
+        ):
         
         self.model_id = model_id
         self.model_save_path = model_save_path
@@ -405,7 +408,7 @@ async def handle_client(reader, writer):
                     print(f"{name}@@@{param}")
                     param_before1 = param.clone()
             elif method == "ROME":
-                if name == "model.layers.5.mlp.down_proj.weight":
+                if name == "model.layers.17.mlp.down_proj.weight":
                     print(f"{name}@@@{param}")
                     param_before1 = param.clone()
         print("===============================================================")
@@ -460,7 +463,7 @@ async def handle_client(reader, writer):
                             print(f"{name}@@@{param}")
                             param_before = param.clone()
                     elif method == "ROME":
-                        if name == "model.layers.5.mlp.down_proj.weight":
+                        if name == "model.layers.17.mlp.down_proj.weight":
                             print(f"{name}@@@{param}")
                             param_before = param.clone()
         if 'clean' in inp.lower():
@@ -538,7 +541,7 @@ async def handle_client(reader, writer):
                                     print(f"{name}@@@{param}")
                                     param_after1 = param.clone()
                             elif method == "ROME":
-                                if name == "model.layers.5.mlp.down_proj.weight":
+                                if name == "model.layers.17.mlp.down_proj.weight":
                                     print(f"{name}@@@{param}")
                                     param_after1 = param.clone()
                                     
@@ -584,7 +587,7 @@ async def handle_client(reader, writer):
                         #                 print(f"{name}@@@{param}")
                         #                 param_before = param.clone()
                         #         elif method == "ROME":
-                        #             if name == "model.layers.5.mlp.down_proj.weight":
+                        #             if name == "model.layers.17.mlp.down_proj.weight":
                         #                 print(f"{name}@@@{param}")
                         #                 param_before = param.clone()
                             
@@ -608,7 +611,7 @@ async def handle_client(reader, writer):
                         #                 print(f"{name}@@@{param}")
                         #                 param_after = param.clone()
                         #         elif method == "ROME":
-                        #             if name == "model.layers.5.mlp.down_proj.weight":
+                        #             if name == "model.layers.17.mlp.down_proj.weight":
                         #                 print(f"{name}@@@{param}")
                         #                 param_after = param.clone()
                                         
@@ -680,7 +683,7 @@ def run_as_terminal():
                     print(f"{name}@@@{param}")
                     param_before1 = param.clone()
             elif method == "ROME":
-                if name == "model.layers.5.mlp.down_proj.weight":
+                if name == "model.layers.17.mlp.down_proj.weight":
                     print(f"{name}@@@{param}")
                     param_before1 = param.clone()
         print("===============================================================")
@@ -701,7 +704,7 @@ def run_as_terminal():
                             print(f"{name}@@@{param}")
                             param_before = param.clone()
                     elif method == "ROME":
-                        if name == "model.layers.5.mlp.down_proj.weight":
+                        if name == "model.layers.17.mlp.down_proj.weight":
                             print(f"{name}@@@{param}")
                             param_before = param.clone()
                             
@@ -778,7 +781,7 @@ def run_as_terminal():
                                     print(f"{name}@@@{param}")
                                     param_after1 = param.clone()
                             elif method == "ROME":
-                                if name == "model.layers.5.mlp.down_proj.weight":
+                                if name == "model.layers.17.mlp.down_proj.weight":
                                     print(f"{name}@@@{param}")
                                     param_after1 = param.clone()
                                     
@@ -828,7 +831,7 @@ def run_as_terminal():
                         #                 print(f"{name}@@@{param}")
                         #                 param_before = param.clone()
                         #         elif method == "ROME":
-                        #             if name == "model.layers.5.mlp.down_proj.weight":
+                        #             if name == "model.layers.17.mlp.down_proj.weight":
                         #                 print(f"{name}@@@{param}")
                         #                 param_before = param.clone()
                             
@@ -852,7 +855,7 @@ def run_as_terminal():
                         #                 print(f"{name}@@@{param}")
                         #                 param_after = param.clone()
                         #         elif method == "ROME":
-                        #             if name == "model.layers.5.mlp.down_proj.weight":
+                        #             if name == "model.layers.17.mlp.down_proj.weight":
                         #                 print(f"{name}@@@{param}")
                         #                 param_after = param.clone()
                                         

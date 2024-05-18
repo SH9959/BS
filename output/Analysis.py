@@ -214,7 +214,16 @@ def get_table_56(json_path:str="") -> None:
     
     a = [a1, a2, a3, a4, a5, a6, a7, a8]
 
-
+    a = [
+        "/home/hsong/BS/output/5/multi_random_loc/ROME/Llama3-Chinese-8B-Instruct/EVAL_ROME_Llama3-Chinese-8B-Instruct_results.json",
+        "/home/hsong/BS/output/17/multi_random_loc/ROME/Llama3-Chinese-8B-Instruct/EVAL_ROME_Llama3-Chinese-8B-Instruct_results.json"
+    ]
+    
+    a=[
+        "/home/hsong/BS/output/518/5/multi_random_loc/ROME/Llama3-Chinese-8B-Instruct/EVAL_ROME_Llama3-Chinese-8B-Instruct_results.json",
+        "/home/hsong/BS/output/518/laywise/multi_random_loc/ROME/Llama3-Chinese-8B-Instruct/EVAL_ROME_Llama3-Chinese-8B-Instruct_results.json",
+        "/home/hsong/BS/output/518/17/multi_random_loc/ROME/Llama3-Chinese-8B-Instruct/EVAL_ROME_Llama3-Chinese-8B-Instruct_results.json"
+    ]
     for i in a:
         if not os.path.exists(i):
             print(f"{i} not exists")

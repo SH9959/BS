@@ -43,7 +43,7 @@ class MyPipeline:
         self.dataset_size=dataset_size
         assert(editing_method in ['FT','LoRA','KN', 'ROME', 'MEMIT', 'PMET'])
         self.editing_method = editing_method
-        assert(model in ['gpt-j-6B','mistral-7b'])
+        assert(model in ['gpt-j-6B','mistral-7b',"Llama3-Chinese-8B-Instruct"])
         self.model = model
         self.dataset_dir = dataset_dir
         self.dataset_name = dataset_name
@@ -297,7 +297,40 @@ class MyPipeline:
         
         ret = self.extract_dataset(test_data=test_data)
         
-        metrics, edited_model = self.do_edit(ret)
+        if "爱因斯坦样例测试" and self.dataset_size == 1:
+            sample = deepcopy(ret)
+            sample["prompts"]=[
+                    "爱因斯坦的专业是"
+                ]
+            sample["rephrase_prompts"]=[
+                    "爱因斯坦专业是什么？"
+                ]
+            
+            sample["target_new"] = [
+                    "医学"
+                ]
+            
+            sample["subject"]= [
+                    "爱因斯坦"
+                ]
+            sample["portability_inputs"]={
+                    "Any": {
+                        "prompt": [
+                            "爱因斯坦的妻子是"
+                        ],
+                        "ground_truth": [
+                            "Mileva Marić"
+                        ]
+                    }
+                }
+            
+    
+            
+        
+            metrics, edited_model = self.do_edit(sample)
+        
+        else:
+            metrics, edited_model = self.do_edit(ret)
 
         print(f"\033[34mMetrics:\n{metrics}\033[0m")
         

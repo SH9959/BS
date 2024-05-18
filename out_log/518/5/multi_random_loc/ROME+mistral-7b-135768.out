@@ -1,0 +1,184 @@
+2024-05-19 00:28:52,793 - easyeditor.editors.editor - INFO - Instantiating model
+05/19/2024 00:28:52 - INFO - easyeditor.editors.editor -   Instantiating model
+
+[43;30m:DATASET INFO:[0m
+len of /home/hsong/BS/DATA/KnowEdit-huggingface/benchmark/ZsRE/ZsRE-test-all.json:1301
+len of sampled data: 100
+The first 5 items of the datasets:
+[
+    {
+        "subject": "Epaspidoceras",
+        "target_new": "Noctuidae",
+        "prompt": "Which family does Epaspidoceras belong to?",
+        "ground_truth": [
+            "Aspidoceratidae"
+        ],
+        "rephrase_prompt": "What family are Epaspidoceras?",
+        "cond": "Geometridae >> Noctuidae || Which family does Epaspidoceras belong to?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The taxon rank of Epaspidoceras is",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                },
+                {
+                    "prompt": "Epaspidoceras taxon rank",
+                    "ground_truth": [
+                        "genus"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Reasoning": [
+                {
+                    "prompt": "What is the common name for the family Epaspidoceras belongs to?",
+                    "ground_truth": "Owlet moths"
+                }
+            ]
+        }
+    },
+    {
+        "subject": "ZIC3",
+        "target_new": "male",
+        "prompt": "What species is ZIC3 specific to?",
+        "ground_truth": [
+            "human"
+        ],
+        "rephrase_prompt": "In which living being can you find ZIC3?",
+        "cond": "human >> male || What species is ZIC3 specific to?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The strand orientation of ZIC3 is",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                },
+                {
+                    "prompt": "ZIC3 strand orientation",
+                    "ground_truth": [
+                        "forward strand"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Subject_Aliasing": [
+                {
+                    "prompt": "What is the function of Zic family member 3?",
+                    "ground_truth": "male"
+                }
+            ]
+        }
+    },
+    {
+        "subject": "Louise Grandjean",
+        "target_new": "mezzo soprano",
+        "prompt": "What voice type is Louise Grandjean?",
+        "ground_truth": [
+            "soprano"
+        ],
+        "rephrase_prompt": "What tone does Louise Grandjean sing in?",
+        "cond": "soprano >> mezzo soprano || What voice type is Louise Grandjean?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The country of citizenship of Louise Grandjean is",
+                    "ground_truth": [
+                        "France"
+                    ]
+                },
+                {
+                    "prompt": "Louise Grandjean country of citizenship",
+                    "ground_truth": [
+                        "France"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Reasoning": [
+                {
+                    "prompt": "What is the vocal range of Louise Grandjean as a mezzo soprano?",
+                    "ground_truth": "A3 to A5"
+                }
+            ]
+        }
+    },
+    {
+        "subject": "Wang Jipeng",
+        "target_new": "Wang Chonghua",
+        "prompt": "Who is listed as Wang Jipeng father?",
+        "ground_truth": [
+            "Wang Yanjun"
+        ],
+        "rephrase_prompt": "What is the name of Wang Jipeng father?",
+        "cond": "Wang Jian >> Wang Chonghua || Who is listed as Wang Jipeng father?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The copyright status as a creator of Wang Jipeng is",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                },
+                {
+                    "prompt": "Wang Jipeng copyright status as a creator",
+                    "ground_truth": [
+                        "copyrights on works have expired"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Logical_Generalization": [
+                {
+                    "prompt": "Who is the son of Wang Chonghua?",
+                    "ground_truth": "Wang Jipeng"
+                }
+            ]
+        }
+    },
+    {
+        "subject": "Charlotte of Schaumburg-Lippe",
+        "target_new": "Charlotte of Bourbon-Parma",
+        "prompt": "What was the name of Charlotte of Schaumburg-Lippe mother?",
+        "ground_truth": [
+            "Princess Bathildis of Anhalt-Dessau"
+        ],
+        "rephrase_prompt": "What was Charlotte the mother's name Schaumburg-Lippe?",
+        "cond": "Charlotte of Bourbon >> Charlotte of Bourbon-Parma || What was the name of Charlotte of Schaumburg-Lippe mother?",
+        "locality": {
+            "Relation_Specificity": [
+                {
+                    "prompt": "The noble title of Charlotte of Schaumburg-Lippe is",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                },
+                {
+                    "prompt": "Charlotte of Schaumburg-Lippe noble title",
+                    "ground_truth": [
+                        "Queen Consort of Württemberg"
+                    ]
+                }
+            ]
+        },
+        "portability": {
+            "Logical_Generalization": [
+                {
+                    "prompt": "Who is the daughter/son of Charlotte of Bourbon-Parma?",
+                    "ground_truth": "Charlotte of Schaumburg-Lippe"
+                }
+            ]
+        }
+    }
+]
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:27<00:27, 27.37s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:39<00:00, 18.58s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:39<00:00, 19.90s/it]
+2024-05-19 00:29:36,632 - easyeditor.editors.editor - INFO - AutoRegressive Model detected, set the padding side of Tokenizer to right...
+05/19/2024 00:29:36 - INFO - easyeditor.editors.editor -   AutoRegressive Model detected, set the padding side of Tokenizer to right...
+  0%|          | 0/100 [00:00<?, ?it/s]  1%|          | 1/100 [00:08<13:35,  8.24s/it]  2%|▏         | 2/100 [00:13<10:49,  6.63s/it]  3%|▎         | 3/100 [00:19<09:53,  6.12s/it]  4%|▍         | 4/100 [00:24<09:25,  5.89s/it]  5%|▌         | 5/100 [00:30<09:07,  5.76s/it]  6%|▌         | 6/100 [00:35<08:54,  5.68s/it]  7%|▋         | 7/100 [00:41<08:44,  5.64s/it]  8%|▊         | 8/100 [00:46<08:37,  5.62s/it]  9%|▉         | 9/100 [00:52<08:29,  5.60s/it] 10%|█         | 10/100 [00:58<08:23,  5.59s/it] 11%|█         | 11/100 [01:03<08:16,  5.58s/it] 12%|█▏        | 12/100 [01:09<08:10,  5.58s/it] 13%|█▎        | 13/100 [01:14<08:04,  5.57s/it] 14%|█▍        | 14/100 [01:20<07:59,  5.58s/it] 15%|█▌        | 15/100 [01:25<07:54,  5.58s/it] 16%|█▌        | 16/100 [01:31<07:48,  5.58s/it] 17%|█▋        | 17/100 [01:37<07:42,  5.58s/it] 18%|█▊        | 18/100 [01:42<07:37,  5.58s/it] 19%|█▉        | 19/100 [01:48<07:31,  5.58s/it] 20%|██        | 20/100 [01:53<07:26,  5.58s/it] 21%|██        | 21/100 [01:59<07:20,  5.58s/it] 22%|██▏       | 22/100 [02:05<07:15,  5.58s/it]

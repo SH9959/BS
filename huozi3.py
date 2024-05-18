@@ -19,7 +19,7 @@ if __name__ == "__main__":
     model_id = "/home/share/models/Chinese-Mixtral-8x7B"
     tokenizer = AutoTokenizer.from_pretrained(model_id)
 
-    model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto")
+    model = AutoModelForCausalLM.from_pretrained(model_id, load_in_4bit=True, device_map="auto")
 
     text = "美国总统是"
     inputs = tokenizer(text, return_tensors="pt",padding=True).to(0)
