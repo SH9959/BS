@@ -34,24 +34,32 @@ import re
 import asyncio
 import socket
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--debug', action='store_true', help='debug mode')
-args, _ = parser.parse_known_args()
-if args.debug:
-    # if you use vscode on hpc-login-01
-    import debugpy
-    debugpy.connect(('192.168.1.50', 6789))
-    debugpy.wait_for_client()
-    debugpy.breakpoint()
+# parser = argparse.ArgumentParser()
+# parser.add_argument('-d', '--debug', action='store_true', help='debug mode')
+# args, _ = parser.parse_known_args()
+# if args.debug:
+#     # if you use vscode on hpc-login-01
+#     import debugpy
+#     debugpy.connect(('192.168.1.50', 6789))
+#     debugpy.wait_for_client()
+#     debugpy.breakpoint()
 
-# 禁用 WARN 级别的日志
-logging.disable(logging.WARNING)
+# # 禁用 WARN 级别的日志
+# logging.disable(logging.WARNING)
 
 import os
 from transformers import AutoTokenizer, AutoModelForCausalLM
 model_id="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"
 model_save_path="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"
 method = 'FT'
+
+
+MODEL = None
+TOKENIZER = None
+MODEL_NAME = None
+terminators = None
+pipeline = None
+
 
 DEBUG = True
 
@@ -129,14 +137,6 @@ class ModelManager:
             self.load_model()
         return self.terminators
 
-# 使用示例
-model_manager = ModelManager()
-
-MODEL = model_manager.get_model()
-TOKENIZER = model_manager.get_tokenizer()
-MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
-terminators = model_manager.get_terminators()
-pipeline = model_manager.get_pipeline()
 
 def send(msg:str):
     TMP = "USER>>"
@@ -191,7 +191,6 @@ class MyEditor:
         
         self.hparams = self.editing_hparams.from_hparams(self.hparams_dir)
     def do_edit(self, params: Dict)-> Tuple[object, object]:
-        global MODEL
         global MODEL
         global TOKENIZER
         global MODEL_NAME
@@ -893,6 +892,7 @@ if __name__ == '__main__':
     # MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
     # terminators = model_manager.get_terminators()
     # pipeline = model_manager.get_pipeline()
+    
     mode_demo = 'terminal'
     
     parser = argparse.ArgumentParser()
@@ -908,6 +908,16 @@ if __name__ == '__main__':
         debugpy.breakpoint()
     
         mode_demo == 'terminal'
+        
+    # 使用示例
+    model_manager = ModelManager()
+
+    MODEL = model_manager.get_model()
+    TOKENIZER = model_manager.get_tokenizer()
+    MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
+    terminators = model_manager.get_terminators()
+    pipeline = model_manager.get_pipeline()
+
     
     # 'terminal'  # 'server'
     

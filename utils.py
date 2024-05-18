@@ -76,3 +76,29 @@ def check_tensors_same(t1:torch.Tensor, t2:torch.Tensor) -> bool:
 
 def get_ip():
     return os.popen('hostname -I').read().strip()
+
+
+import torch
+
+def to_list(rl):
+    wri = rl
+
+    def tensor_to_list(data):
+        if isinstance(data, torch.Tensor):
+            return data.tolist()
+        elif isinstance(data, dict):
+            return {k: tensor_to_list(v) for k, v in data.items()}
+        elif isinstance(data, list):
+            return [tensor_to_list(item) for item in data]
+        else:
+            return data
+
+    # 遍历 rank_list 并将 tensor 转换为 list
+    for layer, layer_info in wri.items():
+        # 删除 'probability' 这一项
+        del layer_info['probability']
+        for target, target_info in layer_info['info'].items():
+            target_info['prob'] = [tensor_to_list(prob) for prob in target_info['prob']]
+            target_info['delt'] = [tensor_to_list(delt) for delt in target_info['delt']]
+
+    return wri
