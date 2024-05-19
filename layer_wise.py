@@ -12,14 +12,15 @@ from functools import partial, wraps
 import matplotlib.pyplot as plt
 import json
 import utils
-
+DEBUG = False
 def timer(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         start_time = time.time()
         result = func(*args, **kwargs)
         end_time = time.time()
-        print(f"Function {func.__name__} TIME: {end_time - start_time} s")
+        if DEBUG:
+            print(f"Function {func.__name__} TIME: {end_time - start_time} s")
         return result
     return wrapper
 
@@ -95,7 +96,8 @@ class myRankLen:
     def __exit__(self,exc_type, exc_val, exc_tb):
         # 获取所有层的输出
         ori_msg = self._hook.__exit__(exc_type, exc_val, exc_tb)
-        print(ori_msg)
+        if DEBUG:
+            print(ori_msg)
         
         self.process_layers(ori_msg)
         self.get_info_of_target(self.tgt,self.tok)
@@ -110,8 +112,10 @@ class myRankLen:
         """得到某个层的目标词s的排名
         
         """
-        print("="*30)
-        print(len(tgt))
+        
+        if DEBUG:
+            print("="*30)
+            print(len(tgt))
         if tok is None:
             tok = self.tok
         layer_probs = self.output[layer_index]['probability']
@@ -188,9 +192,9 @@ def get_info(model, tokenizer, prompt, tgt, layer_hook):
         input_tok = tokenizer(prompt, return_tensors="pt", padding=True).to("cuda:0")
         _ = model(**input_tok)
     next_token = tokenizer.decode(torch.argmax(_.logits[0][-1]).tolist())
-    print(f"最终输出token: {next_token}")
+    # print(f"最终输出token: {next_token}")
     out = ranklen.output
-    print(out)
+    # print(out)
     return out
     
 def calculate_layer_to_modify(rank_list):
@@ -362,13 +366,10 @@ if __name__ == "__main__":
         
     layer_ind = calculate_layer_to_modify(rank_list)
     print(layer_ind)
-    input("layer")
-    
-    
-    
+
     rl = {k:v['info'] for k, v in rank_list.items() if "info" in v}
-    print(rl)
-    pause=input("over: ")
+    #print(rl)
+    #pause=input("over: ")
 
 
 

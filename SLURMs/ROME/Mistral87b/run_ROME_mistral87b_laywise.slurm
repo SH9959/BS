@@ -5,7 +5,7 @@
 #SBATCH -N 1                                  # 作业申请 1 个节点
 #SBATCH -t 3:59:59                          # 任务运行的最长时间为 1 小时
 ##SBATCH -w gpu06                             # 指定运行作业的节点是 gpu06，若不填写系统自动分配节点
-#SBATCH --gres=gpu:nvidia_a100_80gb_pcie:1
+#SBATCH --gres=gpu:a100-sxm-64gb:1
 #SBATCH --mem=64G
 ##SBATCH --cpus-per-task=4
 # source ~/.bashrc

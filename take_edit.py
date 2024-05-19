@@ -61,7 +61,7 @@ terminators = None
 pipeline = None
 
 
-DEBUG = True
+DEBUG = False
 
 class ModelManager:
     def __init__(
