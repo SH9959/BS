@@ -1,17 +1,29 @@
+# =============
+# Author: hsong
+# 包括了：
+# 1、hook
+# 2、ranklen
+# 3、调用示例
+# =============
+
+# 基本库
 import torch
-from torch import nn
-from contextlib import contextmanager
+import json
 import os
-from transformers import AutoTokenizer, AutoModelForCausalLM
-from take_edit import ModelManager
+from torch import nn
 import math, random, time, argparse
-from typing import Tuple, Dict, List, Union, Optional
-from copy import deepcopy
-import transformers
+from contextlib import contextmanager
 from functools import partial, wraps
 import matplotlib.pyplot as plt
-import json
+from typing import Tuple, Dict, List, Union, Optional, Any
+from copy import deepcopy
+# transformers库
+import transformers
+from transformers import AutoTokenizer, AutoModelForCausalLM
+# 本地库
 import utils
+from take_edit import ModelManager
+
 DEBUG = False
 def timer(func):
     @wraps(func)
@@ -70,7 +82,13 @@ class myNetHook:
     #         if name == layer_name:
     #             module.register_forward_hook(hook=hook)
 class myRankLen:
-    def __init__(self, model:object, tok:object, tgt:List[str], _hook:Optional[myNetHook]=None, ):
+    def __init__(
+        self, 
+        model:object, 
+        tok:object, 
+        tgt:List[str], 
+        _hook:Optional[myNetHook]=None, 
+    ):
         self.model = model
         self.tok = tok
         self.tgt = tgt
@@ -108,11 +126,17 @@ class myRankLen:
             # 这里处理每个层的输出，例如应用softmax
             self.output[layer_index]['probability'] = torch.softmax(self.lm_head(self.norm(ori_msg[layer_index]['value'][:, -1, :])), dim=1)
     @timer
-    def get_tgtid_info_at_one_layer(self, layer_index:int, tgt:List[str], tok:object):
-        """得到某个层的目标词s的排名
+    def get_tgtid_info_at_one_layer(
+        self, 
+        layer_index:int, 
+        tgt:Optional[List[str], str], 
+        tok:object
+    ):
+        """得到某个层的目标词s的排名以及概率值等信息
         
         """
-        
+        if isinstance(tgt, str):
+            tgt = [tgt]
         if DEBUG:
             print("="*30)
             print(len(tgt))
@@ -129,26 +153,19 @@ class myRankLen:
         rank_tmp = []
         prob_tmp = []
         delt_tmp = []
-        
         maxpro = torch.max(layer_probs.squeeze(0))
         maxpro_tok=self.tok.decode(torch.argmax(layer_probs.squeeze(0)).clone().tolist())
-        
         for tgt_tok_id in tgts_tok_ids:
-            
             ranks_of_tgt_tokens = []
             prob_of_tgt_tokens = []
             delt_of_tgt_tokens = []
-            
             for one_tgt in tgt_tok_id:
                 pro = layer_probs.squeeze(0)[one_tgt]
                 greater_indices = torch.nonzero(layer_probs.squeeze(0) > pro).flatten()
                 rank = greater_indices.numel() + 1
-                
                 ranks_of_tgt_tokens.append(rank)
                 prob_of_tgt_tokens.append(pro)
                 delt_of_tgt_tokens.append(maxpro - pro)
-                
-                
             rank_tmp.append(ranks_of_tgt_tokens)
             prob_tmp.append(prob_of_tgt_tokens)            
             delt_tmp.append(delt_of_tgt_tokens)       
@@ -165,29 +182,49 @@ class myRankLen:
             
         tgts_with_ranks = dict(zip(tgt, outs))
         
-        """tgts_with_ranks
-        {
-            'bottle of water': [1, 2, 3],
-            '医学': [126784]
-        }
-        """
-        
         return tgts_with_ranks
                 
     @timer            
-    def get_info_of_target(self, tgt:List[str], tok:object):
+    def get_info_of_target(
+        self, 
+        tgt:Union[str, List[str]], 
+        tok:Optional[object]=None, 
+    ):
+        """得到所有层的关于tgts的信息
+        
+        """
+        if isinstance(tgt, str):
+            tgt = [tgt]
         if tok is None:
             tok = self.tok
+            
         for layer_index in range(self.n_layers):
             ra = self.get_tgtid_info_at_one_layer(layer_index, tgt, tok)
             self.output[layer_index]['info'] = ra
             
-# def get_all_layer_outputs(model, inputs):
-#     with MyNetHook(model) as layer_outputs:
-#         _ = model(**inputs)
-#         return layer_outputs
-
-def get_info(model, tokenizer, prompt, tgt, layer_hook):
+        """
+        ra=
+        {
+            '数学':{
+                'rank':[1, 2, 3],
+                'prob':[tensor(0.1), tensor(0.2), tensor(0.3)],
+                'delt':[tensor(0.1), tensor(0.2), tensor(0.3)],
+                'maxpro':0.2,
+                'maxpro_tok':'物理'
+            }
+        }
+        """
+            
+def get_info(
+    model: object, 
+    tokenizer: object, 
+    prompt: str, 
+    tgt: Union[List[str], str], 
+    layer_hook: myNetHook
+) -> Dict[int, Dict[str,  Any]]:
+    """一个外部调用myRankLen的示例
+    
+    """
     with myRankLen(model, tokenizer, tgt, layer_hook,) as ranklen:
         input_tok = tokenizer(prompt, return_tensors="pt", padding=True).to("cuda:0")
         _ = model(**input_tok)
@@ -195,27 +232,53 @@ def get_info(model, tokenizer, prompt, tgt, layer_hook):
     # print(f"最终输出token: {next_token}")
     out = ranklen.output
     # print(out)
+    """
+    {
+        0:{
+            'probability':tensor([[1.1, 0.1]])  #第0层最后一个token的概率分布
+            'info':{
+                '数学':{
+                    'rank':[1, 2, 3],
+                    'prob':[tensor(0.1), tensor(0.2), tensor(0.3)],
+                    'delt':[tensor(0.1), tensor(0.2), tensor(0.3)],
+                    'maxpro':0.2,
+                    'maxpro_tok':'物理'
+                }
+
+            }
+        },
+        
+        1:{
+            'probability':tensor([[1.1, 0.1]])
+            'info':{
+                '数学':{
+                    'rank':[1, 2, 3],
+                    'prob':[tensor(0.1), tensor(0.2), tensor(0.3)],
+                    'delt':[tensor(0.1), tensor(0.2), tensor(0.3)],
+                }
+            }
+        }
+    }
+    
+    """
     return out
     
-def calculate_layer_to_modify(rank_list):
+def calculate_layer_to_modify(info_list:Dict):
     max_count = 0
     max_layer = 5
-    
     # 初始化 word_in_every_layer 字典
     word_in_every_layer = {}
-    for layer, v in rank_list.items():
+    for layer, v in info_list.items():
         for kk, vv in v['info'].items():
             if vv['maxpro_tok'] not in word_in_every_layer:
                 word_in_every_layer[vv['maxpro_tok']] = {"count": 0, "layer": layer}
             word_in_every_layer[vv['maxpro_tok']]['count'] += 1
         
         # 更新最大 count 和对应的层
-        
     for k, v in word_in_every_layer.items():
         if v['count'] > max_count:
             max_count = v['count']
             max_layer = v['layer']
-    
     # 如果所有层的 count 相同，返回 5
     if max_count == 1:
         return 5
@@ -223,14 +286,13 @@ def calculate_layer_to_modify(rank_list):
         return max_layer
         
 
-
-def show_info_in_gragh(rank_list:Dict, one_tgt:str, prompt:str,model_name:str="LlaMA3"):
+def show_info_in_gragh(info_list:Dict, one_tgt:str, prompt:str,model_name:str="LlaMA3"):
     x=[]
     y_rank = []
     y_prob = []
     y_delt = []
     maxpro_toks = []
-    for layer, info in rank_list.items():
+    for layer, info in info_list.items():
         x.append(layer)
         y_rank.append(info['info'][one_tgt]['rank'][0])
         y_prob.append(info['info'][one_tgt]['prob'][0])#.detach().clone().tolist())
@@ -249,60 +311,45 @@ def show_info_in_gragh(rank_list:Dict, one_tgt:str, prompt:str,model_name:str="L
     ax1.set_xlabel('Layer')
     ax1.set_ylabel(f'Rank of ‘{one_tgt}’')
     ax1.tick_params('y')
-
     # 创建柱形图
     ax2 = ax1.twinx()
     bar_width = 0.4  # 设置柱宽
     ax2.bar(x, y_prob, alpha=0.6, width=bar_width, edgecolor='black', linewidth=0.5, linestyle='--', hatch='/', label=f'prob of ‘{one_tgt}’')  # 柱形图
     # 绘制 y_delt，使用偏移量使其与y_prob对齐
     ax2.bar(x, y_delt, alpha=0.6, width=bar_width, edgecolor='black', linewidth=0.5, linestyle='--', hatch='\\', bottom=y_prob, label='delt')  # 柱形图
-    
     for i, (prob, delt, tok) in enumerate(zip(y_prob, y_delt, maxpro_toks)):
         total_height = prob + delt
         ax2.text(x[i], total_height, tok, ha='center', va='bottom', fontsize=8, rotation=80)
-
     ax2.set_ylabel('Probability')
     ax2.tick_params('y')
-
-    # 设置图表标题
     plt.title(f'‘{prompt}’ 在{model_name}中各层的计算情况')
     ax2.legend(loc='upper left')
-
-    # 保存图表为PNG文件
     plt.savefig(f'pngs/17/_{one_tgt}_.png')
         
-
-
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser()
-    
     parser.add_argument('-d', '--debug', action='store_true', help='debug mode')
-        
     args, _ = parser.parse_known_args()
-    
     if args.debug:
-        # if you use vscode on hpc-login-01
         import debugpy
-        
         debugpy.connect(('192.168.1.50', 6789))
         debugpy.wait_for_client()
         debugpy.breakpoint()
-
-    print(torch.cuda.memory_allocated())    
+        
+        
+    #print(torch.cuda.memory_allocated())    
     model_id="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"
     model_save_path="./MODELS/models--FlagAlpha--Llama3-Chinese-8B-Instruct/snapshots/d76c4a5d365b041d1b440337dbf7da9664a464fc"
     model_id="mistralai/Mistral-7B-v0.1"
     model_save_path="./MODELS/Mistral-7B-v0.1"
-    method = 'FT'
-
+    method = 'FT' # 'ROME'
     DEBUG = True
+    
     model_manager = ModelManager(model_id=model_id,model_save_path=model_save_path)
-    print(torch.cuda.memory_allocated())
-    
+    #print(torch.cuda.memory_allocated())
     MODEL = model_manager.get_model()
-    print(torch.cuda.memory_allocated())
-    
+    #print(torch.cuda.memory_allocated())
     TOKENIZER = model_manager.get_tokenizer()
     MODEL_NAME = MODEL.config._name_or_path if hasattr(MODEL.config, '_name_or_path') else None
     terminators = model_manager.get_terminators()
@@ -316,7 +363,6 @@ if __name__ == "__main__":
     
     
     
-
     
     subject = "Einstein"
     r = "’s field of expertise is"
@@ -329,45 +375,28 @@ if __name__ == "__main__":
     txt = subject + r
     origin_out = "物理"
     target = "医学"
-    
     targets = [origin_out, target]
     
-    rank_list = get_info(MODEL, TOKENIZER, txt, targets, layer_hook=None)
     
-    """
-    {
-        0:{
-            'probability':tensor([[1.1, 0.1]])
-            'info':{
-                '数学':{
-                    'rank':[1, 2, 3],
-                    'prob':[tensor(0.1), tensor(0.2), tensor(0.3)],
-                    'delt':[tensor(0.1), tensor(0.2), tensor(0.3)],
-                    'maxpro':0.2,
-                    'maxpro_tok':'物理'
-                }
-
-            }
-        }
-    }
     
-    """
+    info_list = get_info(MODEL, TOKENIZER, txt, targets, layer_hook=None)
     
-    wri = rank_list
+    
+    wri = info_list
     wri = utils.to_list(wri)
     
     word = origin_out
     SAVE=False
     if SAVE:
         with open(f"jsons/17/{word}_info.json", 'w', encoding='utf-8') as f:
-            json.dump(rank_list, f, ensure_ascii=False, indent=4)
+            json.dump(info_list, f, ensure_ascii=False, indent=4)
             
-        show_info_in_gragh(rank_list, one_tgt=word, prompt=txt)
+        show_info_in_gragh(info_list, one_tgt=word, prompt=txt)
         
-    layer_ind = calculate_layer_to_modify(rank_list)
+    layer_ind = calculate_layer_to_modify(info_list)
     print(layer_ind)
 
-    rl = {k:v['info'] for k, v in rank_list.items() if "info" in v}
+    rl = {k:v['info'] for k, v in info_list.items() if "info" in v}
     #print(rl)
     #pause=input("over: ")
 
