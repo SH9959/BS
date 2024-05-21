@@ -26,6 +26,7 @@ from take_edit import ModelManager
 
 DEBUG = False
 def timer(func):
+    # 计时器修饰器
     @wraps(func)
     def wrapper(*args, **kwargs):
         start_time = time.time()
@@ -57,30 +58,34 @@ class myNetHook:
     def __enter__(self):
         if isinstance(self.model, transformers.models.llama.modeling_llama.LlamaForCausalLM):
             decoder = transformers.models.llama.modeling_llama.LlamaDecoderLayer
+            silu = transformers.models.llama.modeling_llama.SiLU
         elif isinstance(self.model, transformers.models.mistral.modeling_mistral.MistralForCausalLM):
             decoder = transformers.models.mistral.modeling_mistral.MistralDecoderLayer
+            silu = transformers.models.mistral.modeling_mistral.SiLU
         def module_hook(module, inputs, output, layer_index):
             if isinstance(module, decoder):
-                # print(f'layer {layer_index} output: {output}')
-                self.all_layer_outputs[layer_index]['value'] = output[0]
-                
+                if DEBUG:
+                    print(f'\033[33mmodule {module} \n layer {layer_index} \n input: {inputs} \n output: {output}\033[0m')
+                    
+                if isinstance(module, decoder):
+                    self.all_layer_outputs[layer_index]['output_tensor'] = output[0]
+                elif isinstance(module, silu):
+                    # 假设SiLU层的输出是output[0]，这里可能会有所不同
+                    self.all_layer_outputs[layer_index]['silu_output'] = output[0]
+                    
         for name, module in self.model.named_modules():
-            if isinstance(module, decoder):
+            if isinstance(module, decoder) or isinstance(module, silu):
                 layer_index = int(name.split(".")[2])
                 # 使用partial来预先绑定layer_index的值
                 hook = partial(module_hook, layer_index=layer_index)
                 self.hooks.append(module.register_forward_hook(hook))
-
         return self
     
     def __exit__(self,exc_type, exc_val, exc_tb):
         for hook in self.hooks:
             hook.remove()
         return self.all_layer_outputs
-    # def get_output_by_layername(self, layer_name):
-    #     for (name, module) in net.named_modules():
-    #         if name == layer_name:
-    #             module.register_forward_hook(hook=hook)
+    
 class myRankLen:
     def __init__(
         self, 
@@ -116,7 +121,6 @@ class myRankLen:
         ori_msg = self._hook.__exit__(exc_type, exc_val, exc_tb)
         if DEBUG:
             print(ori_msg)
-        
         self.process_layers(ori_msg)
         self.get_info_of_target(self.tgt,self.tok)
         
@@ -124,7 +128,8 @@ class myRankLen:
     def process_layers(self, ori_msg):
         for layer_index, outputs in self.output.items():
             # 这里处理每个层的输出，例如应用softmax
-            self.output[layer_index]['probability'] = torch.softmax(self.lm_head(self.norm(ori_msg[layer_index]['value'][:, -1, :])), dim=1)
+            self.output[layer_index]['probability'] = torch.softmax(self.lm_head(self.norm(ori_msg[layer_index]['output_tensor'][:, -1, :])), dim=1)
+    
     @timer
     def get_tgtid_info_at_one_layer(
         self, 
