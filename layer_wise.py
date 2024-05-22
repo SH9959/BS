@@ -131,11 +131,32 @@ class myRankLen:
         
         return self.output
     def process_layers(self, ori_msg):
+        delta1 = []
+        activated_neurons_num_of_last_layer = 0 #记录一下差分值
         for layer_index, outputs in self.output.items():
             # 这里处理每个层的输出，例如应用softmax
+            # 每一层的概率
             self.output[layer_index]['probability'] = torch.softmax(self.lm_head(self.norm(ori_msg[layer_index]['output_tensor'][:, -1, :])), dim=1)
-            self.output[layer_index]['act_fn_output'] = ori_msg[layer_index]['mlp_actfn_output']
-            self.output[layer_index]['act_fn_info'] = utils.count_act_neurous(self.output[layer_index]['act_fn_output'])
+            #每一层的激活值
+            self.output[layer_index]['act_fn_ori_output'] = ori_msg[layer_index]['mlp_actfn_output']
+            #每一层的激活值统计信息
+            self.output[layer_index]['act_fn_info'] = utils.count_act_neurous(self.output[layer_index]['act_fn_ori_output'])
+            # if DEBUG:
+            #     print("\033[34m")
+            #     print(f"层: {layer_index}")
+            #     print(f"激活个数：{len(self.output[layer_index]['act_fn_info'])}")
+            #     print(f"最大值：{max([i['value'] for i in self.output[layer_index]['act_fn_info']])}")
+            #     print(f"平均值：{torch.mean(torch.tensor([i['value'] for i in self.output[layer_index]['act_fn_info']]))}")
+            #     print("\033[0m")
+            diff1 = self.output[layer_index]['act_fn_info']['active_num'] - activated_neurons_num_of_last_layer
+            activated_neurons_num_of_last_layer = self.output[layer_index]['act_fn_info']['active_num']
+            delta1.append(diff1)
+            
+        # 增加差分信息，准备取最大值最作为选择的层
+        self.output['act_delta_list']=delta1
+
+        
+        
     @timer
     def get_tgtid_info_at_one_layer(
         self, 
@@ -247,7 +268,7 @@ def get_info(
     {
         0:{
             'probability':tensor([[1.1, 0.1]])  #第0层最后一个token的概率分布
-            'act_fn_output':tensor([[1.1, 0.1]])  #第0层最后一个token的act_fn输出'
+            'act_fn_ori_output':tensor([[1.1, 0.1]])  #第0层最后一个token的act_fn输出'
             'info':{
                 '数学':{
                     'rank':[1, 2, 3],
@@ -262,7 +283,7 @@ def get_info(
         
         1:{
             'probability':tensor([[1.1, 0.1]])
-            'act_fn_output':tensor([[1.1, 0.1]])  #第0层最后一个token的act_fn输出'
+            'act_fn_ori_output':tensor([[1.1, 0.1]])  #第0层最后一个token的act_fn输出'
             'info':{
                 '数学':{
                     'rank':[1, 2, 3],
@@ -297,7 +318,10 @@ def calculate_layer_to_modify(info_list:Dict):
         return 5
     else:
         return max_layer
-        
+def get_layer_from_act_delta(info_list:Dict) -> int:
+
+    return int(info_list['act_delta_list'].index(max(info_list['act_delta_list'])))
+
 
 def show_info_in_gragh(info_list:Dict, one_tgt:str, prompt:str,model_name:str="LlaMA3"):
     x=[]
@@ -407,8 +431,9 @@ if __name__ == "__main__":
         show_info_in_gragh(info_list, one_tgt=word, prompt=txt)
         
     layer_ind = calculate_layer_to_modify(info_list)
-    print(layer_ind)
-
+    print(f"\033[32m重复token需要修改的层:{layer_ind} ")
+    layer_ind_by_act = get_layer_from_act_delta(info_list)
+    print(f"\033[32m根据act变化需要修改的层: {layer_ind}")
     rl = {k:v['info'] for k, v in info_list.items() if "info" in v}
     #print(rl)
     #pause=input("over: ")

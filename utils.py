@@ -5,7 +5,7 @@ from copy import deepcopy
 import torch
 
 loc_file_path = "/home/hsong/BS/DATA/loc_qa_100_for_app.json"
-
+DEBUG = True
 def add_new_prompt_and_targetnew_to_loc_file(new_data: Dict, loc_file_path:str=loc_file_path):
     
     with open(loc_file_path, 'r', encoding='utf-8') as file:
@@ -78,7 +78,7 @@ def get_ip():
     return os.popen('hostname -I').read().strip()
 
 
-import torch
+
 
 def to_list(rl):
     wri = rl
@@ -104,19 +104,32 @@ def to_list(rl):
     return wri
 
 def count_act_neurous(
-    act_tensor:tensor.Tensor, 
+    act_tensor:torch.Tensor, 
     thres:float=0.1
 ) -> Dict[str, Any]:
 
-    # 使用布尔索引找到大于0.01的元素
-    positive_elements = act_tensor[act_tensor > thres]
-    # 获取这些元素的位置
     positions = torch.nonzero(act_tensor > thres, as_tuple=True)
+    # 将位置的tensor转换为坐标元组列表
+    coordinates = list(zip(*positions))
+    # 创建一个列表，其中包含每个激活元素的值和坐标
+    #result = [{"value": act_tensor[coord], "coordinate": coord} for coord in coordinates] #超过thres的值和其对应坐标
+    
+    #包括统计信息：
+    if DEBUG:
+        print("\033[34m")
+        print(f"层: {layer_index}")
+        print(f"激活个数：{len(self.output[layer_index]['act_fn_info'])}")
+        print(f"最大值：{max([i['value'] for i in self.output[layer_index]['act_fn_info']])}")
+        print(f"平均值：{torch.mean(torch.tensor([i['value'] for i in self.output[layer_index]['act_fn_info']]))}")
+        print("\033[0m")
+    
+    result = {
+        "activated_neurons": [{"value": act_tensor[coord], "coordinate": coord} for coord in coordinates],
+        "active_num": len(self.output[layer_index]['act_fn_info']),
+        "max_value": max([float(i['value']) for i in self.output[layer_index]['act_fn_info']]),
+        "mean_value": float(torch.mean(torch.tensor([i['value'] for i in self.output[layer_index]['act_fn_info']]))),
+        "std_value": float(torch.std(torch.tensor([i['value'] for i in self.output[layer_index]['act_fn_info']]))),
+        "min_value": min([float(i['value']) for i in self.output[layer_index]['act_fn_info']])
+    }
 
-    print("Positive elements:")
-    print(positive_elements)
-    print("\nPositions of positive elements:")
-    print(positions)
-    
-    
-    return {'positive_elements':positive_elements, 'positions':positions}
+    return result
