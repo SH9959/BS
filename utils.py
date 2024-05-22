@@ -96,6 +96,9 @@ def to_list(rl):
     # 遍历 rank_list 并将 tensor 转换为 list
     for layer, layer_info in wri.items():
         # 删除 'probability' 这一项
+        if isinstance(layer, str):
+            continue
+        
         del layer_info['probability']
         for target, target_info in layer_info['info'].items():
             target_info['prob'] = [tensor_to_list(prob) for prob in target_info['prob']]
@@ -105,31 +108,79 @@ def to_list(rl):
 
 def count_act_neurous(
     act_tensor:torch.Tensor, 
-    thres:float=0.1
+    thres:float=0.085
 ) -> Dict[str, Any]:
+    
+    mode = "see_the_big"
+    if mode=="see_all":
+        thres = 0
 
     positions = torch.nonzero(act_tensor > thres, as_tuple=True)
     # 将位置的tensor转换为坐标元组列表
     coordinates = list(zip(*positions))
     # 创建一个列表，其中包含每个激活元素的值和坐标
-    #result = [{"value": act_tensor[coord], "coordinate": coord} for coord in coordinates] #超过thres的值和其对应坐标
-    
+    v_c = [{"value": act_tensor[coord], "coordinate": coord} for coord in coordinates] #超过thres的值和其对应坐标
+    # 这里只考量了激活的神经元情况（>0.1视为激活）
     #包括统计信息：
-    if DEBUG:
-        print("\033[34m")
-        print(f"层: {layer_index}")
-        print(f"激活个数：{len(self.output[layer_index]['act_fn_info'])}")
-        print(f"最大值：{max([i['value'] for i in self.output[layer_index]['act_fn_info']])}")
-        print(f"平均值：{torch.mean(torch.tensor([i['value'] for i in self.output[layer_index]['act_fn_info']]))}")
-        print("\033[0m")
-    
-    result = {
-        "activated_neurons": [{"value": act_tensor[coord], "coordinate": coord} for coord in coordinates],
-        "active_num": len(self.output[layer_index]['act_fn_info']),
-        "max_value": max([float(i['value']) for i in self.output[layer_index]['act_fn_info']]),
-        "mean_value": float(torch.mean(torch.tensor([i['value'] for i in self.output[layer_index]['act_fn_info']]))),
-        "std_value": float(torch.std(torch.tensor([i['value'] for i in self.output[layer_index]['act_fn_info']]))),
-        "min_value": min([float(i['value']) for i in self.output[layer_index]['act_fn_info']])
-    }
-
+    if len(v_c) > 0: 
+        result = {
+            "activated_neurons": v_c,
+            "active_num": len(v_c), #len(self.output[layer_index]['act_fn_info']),
+            "max_value": max([float(i['value']) for i in v_c]),
+            "mean_value": float(torch.mean(torch.tensor([i['value'] for i in v_c]))),
+            "std_value": float(torch.std(torch.tensor([i['value'] for i in v_c]))),
+            "min_value": min([float(i['value']) for i in v_c])
+        }
+    else:
+        result = {
+            "activated_neurons": v_c,
+            "active_num": len(v_c), #len(self.output[layer_index]['act_fn_info']),
+            "max_value": 0, # max([float(i['value']) for i in v_c]),
+            "mean_value": 0, # float(torch.mean(torch.tensor([i['value'] for i in v_c]))),
+            "std_value": 0, # float(torch.std(torch.tensor([i['value'] for i in v_c]))),
+            "min_value": 0 # min([float(i['value']) for i in v_c])
+        }
     return result
+def get_list_of_act_num_of_all_layers(
+    info_list: Dict
+)->List[int]:
+    """根据处理结果得到激活个数的列表
+    一个数据对应一个32大小列表
+    
+    """
+    nums = []
+    delta1 = []
+    activated_neurons_num_of_last_layer = 0 #记录一下差分值
+    for layer_index, outputs in info_list.items():
+        nums.append(info_list[layer_index]['act_fn_info']['active_num'])
+        # info_list[layer_index]['act_fn_info']
+        # diff1 = info_list[layer_index]['act_fn_info']['active_num'] - activated_neurons_num_of_last_layer
+        # activated_neurons_num_of_last_layer = info_list[layer_index]['act_fn_info']['active_num']
+        # delta1.append(diff1)
+    return nums
+    # # 增加差分信息，准备取最大值最作为选择的层
+    # info_list['act_delta_list']=delta1
+    
+def get_diff1_of_list(input_list:List[int]) -> List[int]:
+    # 获取列表中相邻两个元素之间的差值
+    diff1 = [input_list[0]]
+    tmp = [input_list[i+1]-input_list[i] for i in range(len(input_list)-1)]
+    diff1 = diff1 + tmp
+    return diff1
+def check_is_big_num(input_num:List[int]):
+    thres = 1000
+    if max(input_num) > thres:
+        return True
+    else:
+        return False
+    
+def check_is_eat_all_before(act_nums:List[int], ind:int):
+    
+    sum_befor_ind = sum(act_nums[:ind])
+    fenzi = abs(act_nums[ind] - sum_befor_ind)
+    fenmu = abs(act_nums[ind])
+    
+    if fenzi / fenmu < 0.15:
+        return True
+    else:
+        return False

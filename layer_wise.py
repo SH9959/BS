@@ -1,11 +1,11 @@
 # =============
 # Author: hsong
 # 包括了：
-# 1、hook
+# 1、hook     43 - 
 # 2、ranklen
-# 3、调用示例
+# 3、选层函数
+# 4、调用示例
 # =============
-
 # 基本库
 import torch
 import json
@@ -66,8 +66,8 @@ class myNetHook:
             mlp = transformers.models.mistral.modeling_mistral.MistralMLP
         def module_hook(module, inputs, output, layer_index):
             if DEBUG:
-                print(f'\033[33mmodule {module} \n layer {layer_index} \n input: {inputs} \n output: {output}\033[0m')
-                    
+                #print(f'\033[33mmodule {module} \n layer {layer_index} \n input: {inputs} \n output: {output}\033[0m')
+                pass
             if isinstance(module, decoder):
 
                 if isinstance(module, decoder):
@@ -131,8 +131,8 @@ class myRankLen:
         
         return self.output
     def process_layers(self, ori_msg):
-        delta1 = []
-        activated_neurons_num_of_last_layer = 0 #记录一下差分值
+        # delta1 = []
+        # activated_neurons_num_of_last_layer = 0 #记录一下差分值
         for layer_index, outputs in self.output.items():
             # 这里处理每个层的输出，例如应用softmax
             # 每一层的概率
@@ -148,12 +148,12 @@ class myRankLen:
             #     print(f"最大值：{max([i['value'] for i in self.output[layer_index]['act_fn_info']])}")
             #     print(f"平均值：{torch.mean(torch.tensor([i['value'] for i in self.output[layer_index]['act_fn_info']]))}")
             #     print("\033[0m")
-            diff1 = self.output[layer_index]['act_fn_info']['active_num'] - activated_neurons_num_of_last_layer
-            activated_neurons_num_of_last_layer = self.output[layer_index]['act_fn_info']['active_num']
-            delta1.append(diff1)
+            # diff1 = self.output[layer_index]['act_fn_info']['active_num'] - activated_neurons_num_of_last_layer
+            # activated_neurons_num_of_last_layer = self.output[layer_index]['act_fn_info']['active_num']
+            # delta1.append(diff1)
             
         # 增加差分信息，准备取最大值最作为选择的层
-        self.output['act_delta_list']=delta1
+        # self.output['act_delta_list']=delta1
 
         
         
@@ -303,6 +303,8 @@ def calculate_layer_to_modify(info_list:Dict):
     # 初始化 word_in_every_layer 字典
     word_in_every_layer = {}
     for layer, v in info_list.items():
+        if isinstance(layer, str):
+            continue
         for kk, vv in v['info'].items():
             if vv['maxpro_tok'] not in word_in_every_layer:
                 word_in_every_layer[vv['maxpro_tok']] = {"count": 0, "layer": layer}
@@ -319,7 +321,8 @@ def calculate_layer_to_modify(info_list:Dict):
     else:
         return max_layer
 def get_layer_from_act_delta(info_list:Dict) -> int:
-
+    if DEBUG:
+        print(f"----------------------------------------------DELTA: {info_list['act_delta_list']}")
     return int(info_list['act_delta_list'].index(max(info_list['act_delta_list'])))
 
 
@@ -399,8 +402,6 @@ if __name__ == "__main__":
     # ).to(f"cuda:0")
     
     
-    
-    
     subject = "Einstein"
     r = "’s field of expertise is"
     txt = subject + r
@@ -413,8 +414,6 @@ if __name__ == "__main__":
     origin_out = "物理"
     target = "医学"
     targets = [origin_out, target]
-    
-    
     
     info_list = get_info(MODEL, TOKENIZER, txt, targets, layer_hook=None)
     
@@ -432,7 +431,19 @@ if __name__ == "__main__":
         
     layer_ind = calculate_layer_to_modify(info_list)
     print(f"\033[32m重复token需要修改的层:{layer_ind} ")
-    layer_ind_by_act = get_layer_from_act_delta(info_list)
+    
+    
+    act_nums = utils.get_list_of_act_num_of_all_layers(info_list)
+    diff1_act_nums = utils.get_diff1_of_list(act_nums)
+    
+    WIN = 5
+    pre = WIN // 2
+    tmp = delt[layer_ind-pre:layer_ind+WIN]
+    if_big_num = utils.check_big_num(tmp)
+    print(if_big_num)
+        
+        
+    #layer_ind_by_act = get_layer_from_act_delta(info_list)
     print(f"\033[32m根据act变化需要修改的层: {layer_ind}")
     rl = {k:v['info'] for k, v in info_list.items() if "info" in v}
     #print(rl)

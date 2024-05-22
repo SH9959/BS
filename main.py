@@ -324,9 +324,6 @@ class MyPipeline:
                     }
                 }
             
-    
-            
-        
             metrics, edited_model = self.do_edit(sample)
         
         else:
