@@ -1,6 +1,6 @@
 import json
 import math, random, time, argparse, os
-from typing import Tuple, Dict, List, Optional, Union
+from typing import Tuple, Dict, List, Optional, Union, Any
 from copy import deepcopy
 import torch
 
@@ -102,3 +102,21 @@ def to_list(rl):
             target_info['delt'] = [tensor_to_list(delt) for delt in target_info['delt']]
 
     return wri
+
+def count_act_neurous(
+    act_tensor:tensor.Tensor, 
+    thres:float=0.1
+) -> Dict[str, Any]:
+
+    # 使用布尔索引找到大于0.01的元素
+    positive_elements = act_tensor[act_tensor > thres]
+    # 获取这些元素的位置
+    positions = torch.nonzero(act_tensor > thres, as_tuple=True)
+
+    print("Positive elements:")
+    print(positive_elements)
+    print("\nPositions of positive elements:")
+    print(positions)
+    
+    
+    return {'positive_elements':positive_elements, 'positions':positions}

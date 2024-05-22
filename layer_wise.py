@@ -24,11 +24,13 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import utils
 from take_edit import ModelManager
 
-DEBUG = False
+DEBUG = True
+SAVE = False
 def timer(func):
     # 计时器修饰器
     @wraps(func)
     def wrapper(*args, **kwargs):
+        global DEBUG
         start_time = time.time()
         result = func(*args, **kwargs)
         end_time = time.time()
@@ -58,23 +60,24 @@ class myNetHook:
     def __enter__(self):
         if isinstance(self.model, transformers.models.llama.modeling_llama.LlamaForCausalLM):
             decoder = transformers.models.llama.modeling_llama.LlamaDecoderLayer
-            silu = transformers.models.llama.modeling_llama.SiLU
+            mlp = transformers.models.llama.modeling_llama.LlamaMLP
         elif isinstance(self.model, transformers.models.mistral.modeling_mistral.MistralForCausalLM):
             decoder = transformers.models.mistral.modeling_mistral.MistralDecoderLayer
-            silu = transformers.models.mistral.modeling_mistral.SiLU
+            mlp = transformers.models.mistral.modeling_mistral.MistralMLP
         def module_hook(module, inputs, output, layer_index):
-            if isinstance(module, decoder):
-                if DEBUG:
-                    print(f'\033[33mmodule {module} \n layer {layer_index} \n input: {inputs} \n output: {output}\033[0m')
+            if DEBUG:
+                print(f'\033[33mmodule {module} \n layer {layer_index} \n input: {inputs} \n output: {output}\033[0m')
                     
+            if isinstance(module, decoder):
+
                 if isinstance(module, decoder):
                     self.all_layer_outputs[layer_index]['output_tensor'] = output[0]
-                elif isinstance(module, silu):
+            elif isinstance(module, mlp):
                     # 假设SiLU层的输出是output[0]，这里可能会有所不同
-                    self.all_layer_outputs[layer_index]['silu_output'] = output[0]
+                self.all_layer_outputs[layer_index]['mlp_actfn_output'] = output[0]
                     
         for name, module in self.model.named_modules():
-            if isinstance(module, decoder) or isinstance(module, silu):
+            if isinstance(module, decoder) or isinstance(module, mlp):
                 layer_index = int(name.split(".")[2])
                 # 使用partial来预先绑定layer_index的值
                 hook = partial(module_hook, layer_index=layer_index)
@@ -84,6 +87,8 @@ class myNetHook:
     def __exit__(self,exc_type, exc_val, exc_tb):
         for hook in self.hooks:
             hook.remove()
+        if DEBUG:
+            print(self.all_layer_outputs)
         return self.all_layer_outputs
     
 class myRankLen:
@@ -129,12 +134,13 @@ class myRankLen:
         for layer_index, outputs in self.output.items():
             # 这里处理每个层的输出，例如应用softmax
             self.output[layer_index]['probability'] = torch.softmax(self.lm_head(self.norm(ori_msg[layer_index]['output_tensor'][:, -1, :])), dim=1)
-    
+            self.output[layer_index]['act_fn_output'] = ori_msg[layer_index]['mlp_actfn_output']
+            self.output[layer_index]['act_fn_info'] = utils.count_act_neurous(self.output[layer_index]['act_fn_output'])
     @timer
     def get_tgtid_info_at_one_layer(
         self, 
         layer_index:int, 
-        tgt:Optional[List[str], str], 
+        tgt:Union[List[str], str], 
         tok:object
     ):
         """得到某个层的目标词s的排名以及概率值等信息
@@ -241,6 +247,7 @@ def get_info(
     {
         0:{
             'probability':tensor([[1.1, 0.1]])  #第0层最后一个token的概率分布
+            'act_fn_output':tensor([[1.1, 0.1]])  #第0层最后一个token的act_fn输出'
             'info':{
                 '数学':{
                     'rank':[1, 2, 3],
@@ -255,6 +262,7 @@ def get_info(
         
         1:{
             'probability':tensor([[1.1, 0.1]])
+            'act_fn_output':tensor([[1.1, 0.1]])  #第0层最后一个token的act_fn输出'
             'info':{
                 '数学':{
                     'rank':[1, 2, 3],
@@ -391,7 +399,7 @@ if __name__ == "__main__":
     wri = utils.to_list(wri)
     
     word = origin_out
-    SAVE=False
+
     if SAVE:
         with open(f"jsons/17/{word}_info.json", 'w', encoding='utf-8') as f:
             json.dump(info_list, f, ensure_ascii=False, indent=4)
