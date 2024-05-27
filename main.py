@@ -1,3 +1,10 @@
+# ==============================
+# Author: hsong
+# 前期测试
+# ==============================
+
+
+
 import os
 import sys
 sys.path.append('/home/hsong/BS/EasyEdit')

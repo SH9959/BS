@@ -5,7 +5,7 @@ from copy import deepcopy
 import torch
 
 loc_file_path = "/home/hsong/BS/DATA/loc_qa_100_for_app.json"
-DEBUG = True
+DEBUG = False
 def add_new_prompt_and_targetnew_to_loc_file(new_data: Dict, loc_file_path:str=loc_file_path):
     
     with open(loc_file_path, 'r', encoding='utf-8') as file:
@@ -169,18 +169,35 @@ def get_diff1_of_list(input_list:List[int]) -> List[int]:
     return diff1
 def check_is_big_num(input_num:List[int]):
     thres = 1000
-    if max(input_num) > thres:
-        return True
-    else:
-        return False
+    return max(input_num)
+    # if max(input_num) > thres:
+    #     return True
+    # else:
+    #     return False
     
 def check_is_eat_all_before(act_nums:List[int], ind:int):
     
     sum_befor_ind = sum(act_nums[:ind])
     fenzi = abs(act_nums[ind] - sum_befor_ind)
     fenmu = abs(act_nums[ind])
+    if fenmu == 0:
+        return None
+    return fenzi / fenmu
+    # if fenzi / fenmu < 0.15:
+    #     return True
+    # else:
+    #     return False
     
-    if fenzi / fenmu < 0.15:
-        return True
-    else:
-        return False
+def check_is_eat_mean_before(act_nums:List[int], ind:int):
+    
+    sum_befor_ind = sum(act_nums[:ind])
+    if act_nums[ind]  == 0 or ind == 0:
+        return 0
+    
+    mean_before_ind = sum_befor_ind / ind
+    
+    return mean_before_ind / act_nums[ind] 
+    # if act_nums[ind] >  mean_before_ind * 2:
+    #     return True
+    # else:
+    #     return False

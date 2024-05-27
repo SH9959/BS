@@ -1,8 +1,18 @@
+# ====================================
+# Author: hsong
+# 激活数量统计
+# 搭配/home/hsong/BS/analysis523.py
+# ====================================
+
+
+
 import torch
 import argparse
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+import json
+from tqdm import tqdm
 
 from main import MyPipeline
 from take_edit import ModelManager
@@ -42,6 +52,8 @@ if __name__ == "__main__":
         'SAVE_PATH': args.SAVE_PATH
     }
     
+    savename = f"{params['model']}_{params['dataset_name']}_.json"
+    
     Task = MyPipeline(**params)
     
     test_data = Task.read_dataset()
@@ -61,7 +73,7 @@ if __name__ == "__main__":
     # model_save_path="./MODELS/Mistral-7B-v0.1"
     method = 'ROME'
 
-    DEBUG = True
+    DEBUG = False
     model_manager = ModelManager(model_id=model_id,model_save_path=model_save_path)
     print(torch.cuda.memory_allocated())
     
@@ -93,10 +105,11 @@ if __name__ == "__main__":
     
     targets = [origin_out, target]
     
-    test_mode = "爱因斯坦样例"
+    test_mode = "数据集测试" # "爱因斯坦样例"  # 数据集测试
     layers = []  # 记录所有数据挑选的层
-    big_nums_bool = []
-    eat_all_bool = []
+    big_nums_record = []
+    eat_all_record = []
+    eat_mean_record = []
     if test_mode == "爱因斯坦样例":
         
         info_list = get_info(MODEL, TOKENIZER, txt, target, layer_hook=None)
@@ -106,122 +119,160 @@ if __name__ == "__main__":
         if DEBUG:
             print(f"\033[34m激活单元数量列表（1*32）：\n{act_nums}\033[0m")
         diff1_act_nums = utils.get_diff1_of_list(act_nums)  # 一阶差分
-        WIN = 3
+        WIN = 1
         pre = WIN // 2
         tmp = diff1_act_nums[layer_ind-pre:layer_ind+WIN]
         if_big_num = utils.check_is_big_num(tmp)  # 窗口内查看是否有大数字，一个简单的check
         if_eat_all = utils.check_is_eat_all_before(act_nums, layer_ind)
+        if_eat_mean= utils.check_is_eat_mean_before(act_nums, layer_ind)
         print(if_big_num)
-        big_nums_bool.append(if_big_num)
-        eat_all_bool.append(if_eat_all)
+        if if_big_num:
+            big_nums_record.append(if_big_num)
+        if if_eat_all:
+            eat_all_record.append(if_eat_all)
+        if if_eat_mean:
+            eat_mean_record.append(if_eat_mean)
         print("layers:",layers)
         mean_layer = np.mean(layers)
         std_layer = np.std(layers)
         print(mean_layer, std_layer)
-        # 创建棒状图
-        print("*"*30)
-        print("\033[32mactivation equals logitlen\033[0m")
-        print(f"{big_nums_bool}")
-        print(f"The rate of big num:{sum(big_nums_bool)/len(big_nums_bool)}")
-        print(f"{eat_all_bool}")
-        print(f"The rate of eat all:{sum(eat_all_bool)/len(eat_all_bool)}")
-        print("*"*30)
+        
+        print("\033[32m")
+        print("*"*90)
+        print("activation equals logitlen")
+        print(f"{big_nums_record}")
+        print(f"The rate of big num:{sum(big_nums_record)/len(big_nums_record)}")
+        print(f"{eat_all_record}")
+        print(f"The rate of eat all:{sum(eat_all_record)/len(eat_all_record)}")
+        print(f"{eat_mean_record}")
+        print(f"The rate of eat mean:{sum(eat_mean_record)/len(eat_mean_record)}")
+        print("*"*90)
+        print("\033[0m")
         
     else:
-        for i in range(len(ret['prompts'])):
+        for i in tqdm(range(len(ret['prompts']))):
             txt = ret['prompts'][i]
             target = [ret["target_new"][i]]
             info_list = get_info(MODEL, TOKENIZER, txt, target, layer_hook=None)
+            layer_ind = calculate_layer_to_modify(info_list)
+            layers.append(layer_ind)
             act_nums = utils.get_list_of_act_num_of_all_layers(info_list)
             if DEBUG:
                 print(f"\033[34m激活单元数量列表（1*32）：\n{act_nums}\033[0m")
             diff1_act_nums = utils.get_diff1_of_list(act_nums)
-            WIN = 5
+            WIN = 1
             pre = WIN // 2
-            tmp = delt[layer_ind-pre:layer_ind+WIN]
-            if_big_num = utils.check_big_num(tmp)  # 窗口内查看是否有大数字，一个简单的check
-            print(if_big_num)
-            big_nums_bool.append(if_big_num)
-            
-            
-            layer_ind = calculate_layer_to_modify(info_list)
-            layers.append(layer_ind)
-            
+            tmp = diff1_act_nums[layer_ind-pre:layer_ind+WIN]
+            if_big_num = utils.check_is_big_num(tmp)  # 窗口内查看是否有大数字，一个简单的check
+            if_eat_all = utils.check_is_eat_all_before(act_nums, layer_ind)
+            if_eat_mean= utils.check_is_eat_mean_before(act_nums, layer_ind)
+            if DEBUG:
+                print(if_big_num)
+            if if_big_num:
+                big_nums_record.append(if_big_num)
+            if if_eat_all:
+                eat_all_record.append(if_eat_all)
+            if if_eat_mean:
+                eat_mean_record.append(if_eat_mean)
+                
         print("layers:",layers)
         mean_layer = np.mean(layers)
         std_layer = np.std(layers)
         print(mean_layer, std_layer)
-        # 创建棒状图
+        # 记录平均值
         
-        print(f"{big_nums_bool}")
-        print("The rate")
-        print(sum(big_nums_bool)/len(big_nums_bool))
-    
-    
-    """
-    终端运行样例
-    python statistic.py \
-        --editing_method=ROME \
-        --model=Llama3-Chinese-8B-Instruct \
-        --dataset_dir=/home/hsong/BS/DATA/KnowEdit-huggingface/benchmark/ZsRE \
-        --dataset_name=ZsRE-test-all.json \
-        --SAVE_MODE=False \
-        --SAVE_PATH=/home/hsong/BS/output/518/laywise/multi_random_loc/ROME/Llama3-Chinese-8B-Instruct/ \
-        --dataset_size=1 \
-        -d
+        print("\033[32m")
+        print("*"*90)
+        print("activation equals logitlen")
+        #print(f"{big_nums_record}")
+        print(f"The rate of big num:{sum(big_nums_record)/len(big_nums_record)}")
+        #print(f"{eat_all_record}")
+        print(f"The rate of eat all:{sum(eat_all_record)/len(eat_all_record)}")
+        #print(f"{eat_mean_record}")
+        print(f"The rate of eat mean:{sum(eat_mean_record)/len(eat_mean_record)}")
+        print("*"*90)
+        print("\033[0m")
         
-    python statistic.py \
-        --editing_method=ROME \
-        --model=Llama3-Chinese-8B-Instruct \
-        --dataset_dir=/home/hsong/BS/DATA/editing-data/data/counterfact \
-        --dataset_name=counterfact-val.json \
-        --SAVE_MODE=False \
-        --SAVE_PATH=/home/hsong/BS/output/518/laywise/multi_random_loc/ROME/Llama3-Chinese-8B-Instruct/ \
-        --dataset_size=1 \
-        -d
-        
-    python statistic.py \
-        --editing_method=ROME \
-        --model=mistral-7b \
-        --dataset_dir=/home/hsong/BS/DATA/KnowEdit-huggingface/benchmark/ZsRE \
-        --dataset_name=ZsRE-test-all.json \
-        --SAVE_MODE=False \
-        --SAVE_PATH=/home/hsong/BS/output/518/laywise/multi_random_loc/ROME/Llama3-Chinese-8B-Instruct/ \
-        --dataset_size=1 \
-        -d
-        
-    python statistic.py \
-        --editing_method=ROME \
-        --model=mistral-7b \
-        --dataset_dir=/home/hsong/BS/DATA/editing-data/data/counterfact \
-        --dataset_name=counterfact-val.json \
-        --SAVE_MODE=False \
-        --SAVE_PATH=/home/hsong/BS/output/518/laywise/multi_random_loc/ROME/Llama3-Chinese-8B-Instruct/ \
-        --dataset_size=1 \
-        -d
-        
-    
-    """
-    
-    
-    # 用来画图的变量
-    # info_list  画rank折线和每层对应token
-    # layers， mean_layer， std_layer
-    
-    
-    # 画图代码参见 /home/hsong/BS/draw_bar.py
-    
-    # plt.figure(figsize=(8, 6))
+        # big_nums_record = [1, 2, 3, 4, 5]  # 请替换为您实际的列表
+        to_save = {
+            "big_nums_record": big_nums_record,
+            "eat_all_record": eat_all_record,
+            "eat_mean_record": eat_mean_record,
+        }
+        # 指定保存路径
+        # savename = 'path_to_your_file.json'  # 请替换为您实际的保存路径
 
-    # # 绘制均值棒状图
-    # plt.bar(1, mean_layer, yerr=std_layer, capsize=10, label='Mean Layer')
+        # 保存列表为JSON文件
+        print(to_save)
+        if True:
+            with open(savename, 'w') as file:
+                json.dump(to_save, file)
+            
 
-    # # 添加标题和标签
-    # plt.title('Layers Analysis')
-    # plt.xlabel('Metrics')
-    # plt.ylabel('Layer Index')
-    # plt.xticks([1], ['Mean Layer'])  # 只有一个指标，所以 x 轴只有一个刻度
-    # plt.legend()
-    # plt.savefig(f'{model_name}.png')
-    # print("over")
+"""
+终端运行样例
+python statistic.py \
+    --editing_method=ROME \
+    --model=Llama3-Chinese-8B-Instruct \
+    --dataset_dir=/home/hsong/BS/DATA/KnowEdit-huggingface/benchmark/ZsRE \
+    --dataset_name=ZsRE-test-all.json \
+    --SAVE_MODE=False \
+    --SAVE_PATH=/home/hsong/BS/output/518/laywise/multi_random_loc/ROME/Llama3-Chinese-8B-Instruct/ \
+    --dataset_size=1 \
+    -d
+    
+python statistic.py \
+    --editing_method=ROME \
+    --model=Llama3-Chinese-8B-Instruct \
+    --dataset_dir=/home/hsong/BS/DATA/editing-data/data/counterfact \
+    --dataset_name=counterfact-val.json \
+    --SAVE_MODE=False \
+    --SAVE_PATH=/home/hsong/BS/output/518/laywise/multi_random_loc/ROME/Llama3-Chinese-8B-Instruct/ \
+    --dataset_size=1 \
+    -d
+    
+python statistic.py \
+    --editing_method=ROME \
+    --model=mistral-7b \
+    --dataset_dir=/home/hsong/BS/DATA/KnowEdit-huggingface/benchmark/ZsRE \
+    --dataset_name=ZsRE-test-all.json \
+    --SAVE_MODE=False \
+    --SAVE_PATH=/home/hsong/BS/output/518/laywise/multi_random_loc/ROME/Llama3-Chinese-8B-Instruct/ \
+    --dataset_size=1 \
+    -d
+    
+python statistic.py \
+    --editing_method=ROME \
+    --model=mistral-7b \
+    --dataset_dir=/home/hsong/BS/DATA/editing-data/data/counterfact \
+    --dataset_name=counterfact-val.json \
+    --SAVE_MODE=False \
+    --SAVE_PATH=/home/hsong/BS/output/518/laywise/multi_random_loc/ROME/Llama3-Chinese-8B-Instruct/ \
+    --dataset_size=1 \
+    -d
+    
+
+"""
+
+
+# 用来画图的变量
+# info_list  画rank折线和每层对应token
+# layers， mean_layer， std_layer
+
+
+# 画图代码参见 /home/hsong/BS/draw_bar.py
+
+# plt.figure(figsize=(8, 6))
+
+# # 绘制均值棒状图
+# plt.bar(1, mean_layer, yerr=std_layer, capsize=10, label='Mean Layer')
+
+# # 添加标题和标签
+# plt.title('Layers Analysis')
+# plt.xlabel('Metrics')
+# plt.ylabel('Layer Index')
+# plt.xticks([1], ['Mean Layer'])  # 只有一个指标，所以 x 轴只有一个刻度
+# plt.legend()
+# plt.savefig(f'{model_name}.png')
+# print("over")
 

@@ -24,7 +24,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import utils
 from take_edit import ModelManager
 
-DEBUG = True
+DEBUG = False
 SAVE = False
 def timer(func):
     # 计时器修饰器
@@ -364,7 +364,7 @@ def show_info_in_gragh(info_list:Dict, one_tgt:str, prompt:str,model_name:str="L
     ax2.tick_params('y')
     plt.title(f'‘{prompt}’ 在{model_name}中各层的计算情况')
     ax2.legend(loc='upper left')
-    plt.savefig(f'pngs/17/_{one_tgt}_.png')
+    plt.savefig(f'pngs/17/_{one_tgt}_.png', dpi=1000)
         
 if __name__ == "__main__":
     
